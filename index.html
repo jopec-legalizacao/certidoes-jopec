@@ -1,0 +1,619 @@
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0c2a24"><link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon-192.png"><link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Certidões">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px system-ui}[hidden]{display:none!important}img{max-width:100%}</style>
+<title>Certidões Jopec</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: barra fixa no topo com abas; conteúdo em coluna única de até 1180px; tabelas largas rolam dentro do próprio contêiner */
+:root{
+  --bg:#f3f5f4; --surface:#ffffff; --surface2:#e9eeec; --ink:#14201d; --muted:#5a6a65; --line:#d3dcd8;
+  --accent:#0f5c4d; --accent-ink:#ffffff; --stamp:#9b2c1f;
+  --ok:#1f7a4a; --ok-bg:#dff1e6; --warn:#a15c00; --warn-bg:#fdecc8; --bad:#b3261e; --bad-bg:#fbdcd8;
+  --info:#1d5fa8; --info-bg:#dbe8f8; --pend:#8a4b00; --pend-bg:#f6e0c7; --none:#7d8a86; --none-bg:#eceff0;
+  --f-display:"Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --f-body:"Instrument Sans", "Segoe UI", system-ui, sans-serif;
+  --f-mono:"JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
+  --band:#0c2a24; --band-ink:#e8f2ee; --band-muted:#9cc0b5; --paper:#fbfcfb;
+  --r:12px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0f1514; --surface:#17201e; --surface2:#1f2a27; --ink:#e4ece9; --muted:#9aaba5; --line:#2c3a36;
+  --accent:#4fbf9f; --accent-ink:#06211b; --stamp:#f08a7c;
+  --ok:#6fd39b; --ok-bg:#163527; --warn:#f2b54f; --warn-bg:#3a2c10; --bad:#ff8a80; --bad-bg:#3d1916;
+  --info:#8ab8f0; --info-bg:#172a42; --pend:#f0b27a; --pend-bg:#3a2614; --none:#8a9894; --none-bg:#222c2a; --band:#0a1916; --band-ink:#e4ece9; --band-muted:#86a89e; --paper:#17201e; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0f1514; --surface:#17201e; --surface2:#1f2a27; --ink:#e4ece9; --muted:#9aaba5; --line:#2c3a36;
+  --accent:#4fbf9f; --accent-ink:#06211b; --stamp:#f08a7c;
+  --ok:#6fd39b; --ok-bg:#163527; --warn:#f2b54f; --warn-bg:#3a2c10; --bad:#ff8a80; --bad-bg:#3d1916;
+  --info:#8ab8f0; --info-bg:#172a42; --pend:#f0b27a; --pend-bg:#3a2614; --none:#8a9894; --none-bg:#222c2a; --band:#0a1916; --band-ink:#e4ece9; --band-muted:#86a89e; --paper:#17201e; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.45}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--band)}
+header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--band);color:var(--band-ink)}
+.wrap{max-width:1180px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.topbar{display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding-block:12px 0}
+.brand{display:flex;align-items:center;gap:12px;margin-right:auto}
+.brand canvas{width:40px;height:40px;flex:none}
+.brand small{display:block;font-size:12px;color:var(--band-muted);font-weight:500}
+.brand h1{font-family:var(--f-display);font-size:22px;margin:0;letter-spacing:-.01em}
+.sync{font-size:12px;color:var(--band-muted);border:1px solid color-mix(in srgb,var(--band-muted) 40%,transparent);border-radius:999px;padding:4px 10px}
+nav.tabs{display:flex;gap:2px;overflow-x:auto;margin-top:8px}
+nav.tabs button{font:600 14px var(--f-body);background:none;border:0;border-bottom:3px solid transparent;color:var(--band-muted);padding:10px 14px;cursor:pointer;white-space:nowrap}
+nav.tabs button:hover{color:var(--band-ink)}
+nav.tabs button[aria-selected="true"]{color:var(--band-ink);border-bottom-color:#5fd0ae}
+nav.tabs button:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+main{padding-block:20px 60px}
+section.view{display:flex;flex-direction:column;gap:18px}
+h2{font-family:var(--f-display);font-size:20px;margin:0;text-wrap:balance}
+h3{font-size:15px;margin:0}
+.muted{color:var(--muted)}
+.small{font-size:13px}
+.mono{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+.hero{display:grid;grid-template-columns:auto minmax(0,1fr);gap:16px;align-items:stretch}
+@media (max-width:640px){.hero{grid-template-columns:1fr}}
+.ringbox{position:relative;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px;display:grid;place-items:center;min-width:200px}
+.ringbox canvas{width:170px;height:170px}
+.ringlab{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;pointer-events:none}
+.ringlab b{font-family:var(--f-display);font-size:34px;line-height:1}
+.ringlab span{font-size:12px;color:var(--muted)}
+.tgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:10px}
+.tcard{all:unset;box-sizing:border-box;cursor:pointer;display:grid;grid-template-columns:56px minmax(0,1fr);gap:12px;align-items:center;padding:12px;border:1px solid var(--line);border-radius:10px;background:var(--bg);transition:border-color .15s,transform .15s}
+.tcard:hover{border-color:var(--accent);transform:translateY(-1px)}
+.tcard:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.tcard[aria-pressed="true"]{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent);background:var(--surface)}
+.tcard canvas{width:56px;height:56px}
+.tcard .tn{font-weight:600;font-size:13px;line-height:1.25}
+.tcard .tv{font-family:var(--f-display);font-size:17px;line-height:1.15;margin-top:3px}
+.tcard .tv.bad{color:var(--bad)} .tcard .tv.good{color:var(--ok)} .tcard .tv.nil{color:var(--muted);font-size:14px}
+.tcard .ts{font-size:12px;color:var(--muted)}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));grid-auto-rows:1fr;gap:10px}
+.kpi{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px 16px;display:flex;flex-direction:column;justify-content:space-between;gap:10px;min-height:84px;cursor:pointer;text-align:left;font:inherit;color:inherit}
+.kpi b{font-family:var(--f-display);font-size:34px;line-height:1}
+.kpi span{font-size:13px;color:var(--muted);display:flex;align-items:center;gap:6px}
+.kpi span::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--dot,var(--muted))}
+.kpi{transition:transform .15s, box-shadow .15s}.kpi:hover{transform:translateY(-1px);box-shadow:0 4px 14px -8px rgb(0 0 0 / .35)}
+.kpi[data-k="venc"]{--dot:var(--bad)}.kpi[data-k="renovar"]{--dot:var(--warn)}.kpi[data-k="pend"]{--dot:var(--pend)}.kpi[data-k="and"]{--dot:var(--info)}.kpi[data-k="atencao"]{--dot:#d4a72c}
+.kpi[data-k="venc"] b{color:var(--bad)} .kpi[data-k="renovar"] b{color:var(--warn)} .kpi[data-k="pend"] b{color:var(--pend)} .kpi[data-k="and"] b{color:var(--info)} .kpi[data-k="atencao"] b{color:var(--ink)}
+.kpi[aria-pressed="true"]{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px;display:flex;flex-direction:column;gap:12px;min-width:0}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.grow{flex:1 1 220px;min-width:0}
+input,select,textarea{font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:8px 10px;min-width:0}
+textarea{width:100%;min-height:110px;resize:vertical}
+label.f{display:flex;flex-direction:column;gap:4px;font-size:13px;color:var(--muted)}
+label.f > *{color:var(--ink)}
+button.btn{font:600 14px var(--f-body);border-radius:8px;padding:8px 14px;cursor:pointer;border:1px solid var(--line);background:var(--surface);color:var(--ink)}
+button.btn.pri{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+button.btn.danger{color:var(--bad);border-color:var(--bad)}
+button.btn:disabled{opacity:.55;cursor:default}
+button.link{background:none;border:0;color:var(--accent);font:600 13px var(--f-body);cursor:pointer;padding:2px 0}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{font:500 12px var(--f-body);border:1px solid var(--line);background:var(--surface);color:var(--muted);border-radius:999px;padding:4px 10px;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--surface);border-color:var(--ink)}
+.scroll{overflow-x:auto;border:1px solid var(--line);border-radius:var(--r);background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:middle}
+th{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:600;background:var(--surface2);position:sticky;top:0}
+tr:last-child td{border-bottom:0}
+tbody tr:hover td{background:color-mix(in srgb,var(--accent) 6%,transparent)}
+#fila td:first-child{box-shadow:inset 4px 0 0 var(--sev,transparent)}
+td.name{font-weight:600;min-width:180px}
+td.name button{all:unset;cursor:pointer}
+td.name button:hover{text-decoration:underline}
+.pill{display:inline-flex;align-items:center;gap:6px;font:600 12px var(--f-body);border-radius:999px;padding:3px 9px;white-space:nowrap}
+.s-ok{background:var(--ok-bg);color:var(--ok)} .s-atencao{background:var(--warn-bg);color:var(--warn)} .s-renovar{background:var(--warn-bg);color:var(--warn)}
+.s-venc{background:var(--bad-bg);color:var(--bad)} .s-pend{background:var(--pend-bg);color:var(--pend)} .s-and{background:var(--info-bg);color:var(--info)} .s-sem,.s-subst{background:var(--none-bg);color:var(--none)}
+.grid td.c{padding:4px;text-align:center}
+.cell{all:unset;box-sizing:border-box;cursor:pointer;display:block;min-width:58px;border-radius:6px;padding:5px 4px;font:500 11px var(--f-mono);text-align:center}
+.cell:focus-visible{outline:2px solid var(--accent)}
+.legend{display:flex;gap:8px;flex-wrap:wrap;font-size:12px}
+.empty{padding:28px;text-align:center;color:var(--muted)}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--surface);padding:10px 16px;border-radius:8px;font-size:14px;z-index:30;max-width:calc(100% - 32px)}
+dialog{border:1px solid var(--line);border-radius:14px;padding:0;background:var(--surface);color:var(--ink);width:min(680px,calc(100% - 24px));max-height:calc(100% - 40px)}
+dialog::backdrop{background:rgb(0 0 0 / .45)}
+dialog .dh{display:flex;align-items:center;gap:10px;padding:14px 16px;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--surface)}
+dialog .db{padding:16px;display:flex;flex-direction:column;gap:12px}
+dialog .df{padding:12px 16px;border-top:1px solid var(--line);display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}
+.formgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px}
+.kv{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:8px 16px;font-size:14px}
+.kv div span{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.answer{white-space:pre-wrap;background:var(--surface2);border-radius:8px;padding:12px;font-size:14px;min-height:40px}
+.note{font-size:13px;color:var(--muted);background:var(--surface2);border-radius:8px;padding:10px 12px}
+.drop{border:1.5px dashed var(--line);border-radius:var(--r);padding:14px;text-align:center;color:var(--muted);font-size:14px}
+.drop.over{border-color:var(--accent);color:var(--ink)}
+.files{display:flex;gap:6px;flex-wrap:wrap}
+.split{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:18px}
+@media (max-width:820px){.split{grid-template-columns:1fr}}
+@media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+</style>
+
+</head><body>
+<header class="top">
+  <div class="wrap">
+    <div class="topbar">
+      <div class="brand"><canvas id="logo" width="80" height="80" aria-hidden="true"></canvas><div><h1>Certidões Jopec</h1><small>Departamento de Legalização · controle de CNDs</small></div></div>
+      <span class="sync" id="sync">Conectando…</span><button class="btn" id="sair" hidden style="background:transparent;color:var(--band-ink);border-color:var(--band-muted)">Sair</button>
+    </div>
+    <nav class="tabs" role="tablist" id="tabs">
+      <button role="tab" data-v="painel" aria-selected="true">Painel</button>
+      <button role="tab" data-v="empresas" aria-selected="false">Empresas</button>
+      <button role="tab" data-v="lancar" aria-selected="false">Lançar certidões</button>
+      <button role="tab" data-v="perguntar" aria-selected="false">Perguntar à IA</button>
+      <button role="tab" data-v="dados" aria-selected="false">Importar e backup</button>
+    </nav>
+  </div>
+</header>
+
+<section id="login" class="wrap" hidden style="padding-block:60px"><form id="lgForm" class="panel" style="max-width:380px;margin:0 auto"><h2>Entrar</h2><p class="muted small" style="margin:0">Use o e-mail e a senha cadastrados para a equipe da Jopec.</p><label class="f">E-mail<input id="lgEmail" type="email" autocomplete="username" required></label><label class="f">Senha<input id="lgPass" type="password" autocomplete="current-password" required></label><button class="btn pri" type="submit">Entrar</button><span class="small muted" id="lgMsg"></span></form></section>
+<main class="wrap">
+  <!-- PAINEL -->
+  <section class="view" id="v-painel">
+    <div class="hero"><div class="ringbox"><canvas id="ring" aria-label="Percentual de certidões em dia"></canvas><div class="ringlab"><b class="mono" id="ringPct">–</b><span>das certidões<br>em dia</span></div></div><div class="kpis" id="kpis"></div></div>
+    <div class="panel"><div class="row"><h2 class="grow">Situação por certidão</h2><span class="small muted">Toque num cartão para ver só aquela certidão na fila</span></div><div class="tgrid" id="tgrid"></div></div>
+    <div class="panel">
+      <div class="row">
+        <h2 class="grow">Fila de renovação</h2>
+        <input id="filaBusca" placeholder="Filtrar empresa" aria-label="Filtrar empresa" style="flex:0 1 220px">
+      </div>
+      <div class="chips" id="filaTipos"></div>
+      <p class="muted small" style="margin:0">Renovar a partir de: Estadual RJ conjunta (SEFAZ + PGE, vale 30 dias) 5 dias antes, PGM 14 dias antes, demais conforme a validade. Clique numa linha para lançar a nova certidão.</p>
+      <div class="scroll"><table><thead><tr><th>Empresa</th><th>Certidão</th><th>Validade</th><th>Situação</th><th>Renovar a partir de</th><th>Observação</th><th></th></tr></thead><tbody id="fila"></tbody></table></div>
+    </div>
+    <div class="panel">
+      <h3>Últimos lançamentos</h3>
+      <div id="hist" class="small"></div>
+    </div>
+  </section>
+
+  <!-- EMPRESAS -->
+  <section class="view" id="v-empresas" hidden>
+    <div class="row">
+      <input id="busca" class="grow" placeholder="Buscar por nome, razão social, CNPJ ou inscrição" aria-label="Buscar empresa">
+      <label class="row small muted"><input type="checkbox" id="verArq"> Mostrar arquivadas</label>
+      <button class="btn pri" id="novaEmp">Nova empresa</button>
+    </div>
+    <div class="legend" id="legenda"></div>
+    <div class="scroll" style="max-height:72vh;overflow:auto"><table class="grid"><thead id="gridHead"></thead><tbody id="grid"></tbody></table></div>
+  </section>
+
+  <!-- LANÇAR -->
+  <section class="view" id="v-lancar" hidden>
+    <div class="split">
+      <div class="panel">
+        <h2>Lançar com a IA</h2>
+        <p class="muted small" style="margin:0">Escreva do seu jeito ou anexe as certidões em PDF. A IA identifica a empresa, o tipo, a emissão e a validade, e você confere antes de salvar.</p>
+        <textarea id="lText" placeholder="Ex.: CND da RFB da Vostok emitida hoje. PGM da Allegra pedida, protocolo 5106120200, pronta em 01/12/2026. ISS da Pakhet saiu só protocolo."></textarea>
+        <div class="drop" id="drop">Arraste os PDFs das certidões aqui ou <button class="link" id="pick">escolha os arquivos</button><input type="file" id="lFiles" multiple accept="application/pdf" hidden></div>
+        <div class="files" id="lFileList"></div>
+        <div class="row"><button class="btn pri" id="lGo">Ler e preparar lançamentos</button><button class="btn" id="lStop" hidden>Parar</button><span class="small muted" id="lMsg"></span></div>
+      </div>
+      <div class="panel">
+        <h2>Lançar manualmente</h2>
+        <div class="formgrid">
+          <label class="f">Empresa<select id="mEmp"></select></label>
+          <label class="f">Certidão<select id="mTipo"></select></label>
+          <label class="f">Data de emissão<input type="date" id="mEmi"></label>
+          <label class="f">Situação<input id="mStatus" placeholder="NEGATIVA, PRONTO EM…, SOLICITAR VIA AGENDAMENTO…"></label>
+        </div>
+        <label class="row small"><input type="checkbox" id="mValOn"> Validade diferente do prazo padrão</label>
+        <label class="f" id="mValBox" hidden>Validade real<input type="date" id="mVal"></label>
+        <label class="f">Observação<input id="mObs"></label>
+        <div class="row"><button class="btn pri" id="mSave">Salvar</button><span class="small muted" id="mCalc"></span></div>
+      </div>
+    </div>
+    <div class="panel" id="revBox" hidden>
+      <div class="row"><h2 class="grow">Conferir antes de salvar</h2><button class="btn" id="revCancel">Descartar</button><button class="btn pri" id="revSave">Salvar lançamentos</button></div>
+      <div id="revNotes" class="note" hidden></div>
+      <div class="scroll"><table><thead><tr><th></th><th>Empresa</th><th>Certidão</th><th>Emissão</th><th>Validade real</th><th>Situação</th><th>Observação</th></tr></thead><tbody id="rev"></tbody></table></div>
+    </div>
+  </section>
+
+  <!-- PERGUNTAR -->
+  <section class="view" id="v-perguntar" hidden>
+    <div class="panel">
+      <h2>Perguntar à IA</h2>
+      <p class="muted small" style="margin:0">A IA consulta o controle para responder. Exemplos: “quais certidões da PGM posso pedir esta semana?”, “o que falta para a Vostok?”, “monte a lista de pendências de ISS”.</p>
+      <div class="chips" id="sugs"></div>
+      <textarea id="qText" style="min-height:80px" placeholder="Sua pergunta"></textarea>
+      <div class="row"><button class="btn pri" id="qGo">Perguntar</button><button class="btn" id="qStop" hidden>Parar</button><span class="small muted" id="qMsg"></span></div>
+      <div class="answer" id="qAns" hidden></div>
+    </div>
+  </section>
+
+  <!-- DADOS -->
+  <section class="view" id="v-dados" hidden>
+    <div class="split">
+      <div class="panel">
+        <h2>Importar a planilha</h2>
+        <p class="muted small" style="margin:0">No Google Planilhas, abra “FluxoPro — Controle e Backup”, vá em Arquivo › Fazer download › Microsoft Excel (.xlsx) e escolha o arquivo aqui. As abas de empresa e o CADASTRO CLIENTES são lidos; o painel e os alertas são ignorados.</p>
+        <input type="file" id="xFile" accept=".xlsx,.xls">
+        <div id="xPrev" class="small"></div>
+        <div class="row"><button class="btn pri" id="xGo" disabled>Importar</button><span class="small muted" id="xMsg"></span></div>
+      </div>
+      <div class="panel">
+        <h2>Backup</h2>
+        <p class="muted small" style="margin:0">Baixe uma cópia de tudo. O JSON serve para restaurar; o CSV abre no Excel.</p>
+        <div class="row"><button class="btn" id="bJson">Baixar JSON</button><button class="btn" id="bCsv">Baixar CSV</button></div>
+        <h3>Sites para emitir</h3><p class="muted small" style="margin:0">O botão Emitir abre este endereço e copia o CNPJ (ou a inscrição municipal, no ISS). Corrija se algum site mudar.</p><div id="links" style="display:flex;flex-direction:column;gap:6px"></div><div class="row"><button class="btn" id="linksSave">Salvar endereços</button></div>
+        <h3>Prazos de validade usados</h3>
+        <div class="scroll"><table><thead><tr><th>Certidão</th><th>Validade</th><th>Renovar</th></tr></thead><tbody id="prazos"></tbody></table></div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<dialog id="dlg"><div class="dh"><h2 id="dT" class="grow"></h2><button class="btn" id="dX">Fechar</button></div><div class="db" id="dB"></div><div class="df" id="dF"></div></dialog>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+const TIPOS=[
+ {k:'RFB',n:'CND RFB/PGFN',a:'RFB',prazo:180,ant:15,m:['CND conjunta','RFB']},
+ {k:'EST',n:'CND Estadual RJ conjunta (SEFAZ + PGE)',a:'EST-RJ',prazo:30,ant:5,m:['Estadual RJ','conjunta estadual']},
+ {k:'SEFAZ',n:'Fazenda Estadual (antiga, antes da unificação)',a:'SEFAZ*',prazo:90,ant:10,m:['Fazenda Estadual'],legado:true},
+ {k:'PGE',n:'Dívida Ativa do Estado – PGE (antiga, antes da unificação)',a:'PGE*',prazo:180,ant:30,m:['Dívida Ativa do Estado'],legado:true},
+ {k:'ISS',n:'ISS – Fazenda Municipal',a:'ISS',prazo:90,ant:15,m:['Fazenda Municipal']},
+ {k:'PGM',n:'Dívida Ativa do Município (PGM)',a:'PGM',prazo:119,ant:14,m:['Dívida Ativa do Munic']},
+ {k:'FGTS',n:'FGTS (CRF)',a:'FGTS',prazo:29,ant:5,m:['FGTS']},
+ {k:'TRAB',n:'Débitos Trabalhistas (CNDT)',a:'CNDT',prazo:180,ant:15,m:['Débitos Trab']},
+ {k:'CORREG',n:'Corregedoria',a:'CORR',prazo:90,ant:10,m:['Corregedoria']},
+ {k:'CIV',n:'TJ – Ações Cíveis',a:'CÍVEL',prazo:90,ant:10,m:['Ações Cíveis','Ações Civeis','Cível']},
+ {k:'FAL',n:'TJ – Ações de Falências e Concordatas',a:'FAL',prazo:90,ant:10,m:['Falências','Falencias']},
+ {k:'PROT',n:'Protesto de Títulos',a:'PROT',prazo:90,ant:10,m:['Protesto']},
+ {k:'SICAF',n:'SICAF',a:'SICAF',prazo:365,ant:30,m:['SICAF']}
+];
+const TK=Object.fromEntries(TIPOS.map(t=>[t.k,t]));
+const LINKS0={RFB:'https://solucoes.receita.fazenda.gov.br/Servicos/certidaointernet/PJ/Emitir',EST:'https://www.fazenda.rj.gov.br/portal-fazenda',SEFAZ:'https://www.fazenda.rj.gov.br/portal-fazenda',PGE:'https://www.pge.rj.gov.br/divida-ativa',ISS:'https://www2.rio.rj.gov.br/smf/forms/pesquisa.asp',PGM:'https://daminternet.rio.rj.gov.br/',FGTS:'https://consulta-crf.caixa.gov.br/consultacrf/pages/consultaEmpregador.jsf',TRAB:'https://cndt-certidao.tst.jus.br/inicio.faces'};
+let LINKS=Object.assign({},LINKS0),cfgVer=null;
+function chaveDe(e,k){return k==='ISS'?(e.im||'').replace(/\D/g,''):(e.cnpj||'').replace(/\D/g,'');}
+function emitirHTML(e,k){const u=LINKS[k];const ch=chaveDe(e,k);const lab=k==='ISS'?'inscrição':'CNPJ';
+  return (u?'<a class="btn pri" href="'+esc(u)+'" target="_blank" rel="noopener" data-copy="'+esc(ch)+'" style="text-decoration:none">Emitir no site'+(ch?' (copia o '+lab+')':'')+'</a>':'<span class="small muted">Sem link cadastrado para esta certidão. Cadastre em Importar e backup.</span>')+(ch?' <button class="btn" data-copy="'+esc(ch)+'">Copiar '+lab+'</button>':'');}
+async function copiar(txt){try{await navigator.clipboard.writeText(txt);toast('Copiado: '+txt);}catch(e){toast('Não consegui copiar. '+txt);}}
+document.addEventListener('click',e=>{const a=e.target.closest('[data-copy]');if(a&&a.dataset.copy){copiar(a.dataset.copy);if(a.tagName==='BUTTON')e.preventDefault();}e.target.closest('.emit')&&e.stopPropagation();},true);
+const EST={venc:'Vencida',renovar:'Renovar agora',atencao:'Vence em 30 dias',pend:'Pendência',and:'Em andamento',ok:'Válida',sem:'Sem dado',subst:'Substituída pela conjunta'};
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const SB_URL='https://bpnprrkfhrqsdwsevwsk.supabase.co',SB_KEY='sb_publishable_e6AIT0wPu3bG-2-TTCR5pQ_UAwhX1N7';
+const sb=window.supabase.createClient(SB_URL,SB_KEY);
+let db=true,downloads=true,EMP=[],HIST=[],dbOk=false;
+async function ia(prompt,json){const {data,error}=await sb.functions.invoke('ia',{body:{prompt,json}});if(error){let m=error.message;try{const b=await error.context.json();m=b.error||m;}catch(e){}throw {code:'upstream_error',message:m};}if(data&&data.error)throw {code:'upstream_error',message:data.error};return data.text||'';}
+const sample=async(prompt,opts={})=>{if(opts.images&&opts.images.length)throw {code:'images_unavailable'};
+  if(opts.tools){const ql=prompt.toLowerCase();const hit=EMP.filter(e=>e.nome&&ql.includes(e.nome.toLowerCase())).slice(0,4);if(hit.length)prompt+='\n\nDADOS COMPLETOS DAS EMPRESAS CITADAS:\n'+JSON.stringify(hit.map(resumoEmp));}
+  const text=await ia(prompt,false);opts.onText&&opts.onText({text});return {text,truncated:false};};
+sample.json=async(prompt,opts={})=>{if(opts.images&&opts.images.length)throw {code:'images_unavailable'};const t=await ia(prompt,true);try{return JSON.parse(t.replace(/^```(json)?|```$/g,'').trim());}catch(e){throw {code:'invalid_json',message:'resposta inválida da IA'};}};
+const st={kpi:null,tipo:null,busca:'',fbusca:'',arq:false};
+
+/* ---------- datas ---------- */
+function hoje(){const d=new Date();return new Date(d.getFullYear(),d.getMonth(),d.getDate());}
+function hojeISO(){return iso(hoje());}
+function iso(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+function pd(s){if(!s)return null;const m=/^(\d{4})-(\d{2})-(\d{2})/.exec(s);return m?new Date(+m[1],m[2]-1,+m[3]):null;}
+function add(s,n){const d=pd(s);if(!d)return null;d.setDate(d.getDate()+n);return iso(d);}
+function br(s){const d=pd(s);return d?String(d.getDate()).padStart(2,'0')+'/'+String(d.getMonth()+1).padStart(2,'0')+'/'+d.getFullYear():'—';}
+function dias(s){const d=pd(s);return d?Math.round((d-hoje())/864e5):null;}
+function brToIso(s){const m=/(\d{1,2})\/(\d{1,2})\/(\d{2,4})/.exec(s||'');if(!m)return null;let y=+m[3];if(y<100)y+=2000;return y+'-'+String(m[2]).padStart(2,'0')+'-'+String(m[1]).padStart(2,'0');}
+
+/* ---------- regras ---------- */
+function prazoDe(e,k){return (e.prazos&&+e.prazos[k])||TK[k].prazo;}
+function info(e,k){
+  const c=(e.certs||{})[k]||{};const t=TK[k];
+  const val=c.validade||(c.emissao?add(c.emissao,prazoDe(e,k)):null);
+  const s=String(c.status||'');let est;
+  const n=val?dias(val):null;
+  if(t.legado){const nova=(e.certs||{}).EST;if(nova&&(nova.emissao||nova.status))return {c,val,n,est:'subst',renovar:null,manual:!!c.validade};}
+  if(/SOLICITAD|PRONTO|PROTOCOLO|AGUARD|REQUERID|EM AN[AÁ]LISE/i.test(s)&&!(n!==null&&n>t.ant))est='and';
+  else if(/PEND|AGENDAMENTO|POSITIVA(?! COM EFEITO)|EXIG|IRREGULAR/i.test(s)&&!(n!==null&&n>t.ant))est='pend';
+  else if(!val)est='sem';
+  else if(n<0)est='venc';
+  else if(n<=t.ant)est='renovar';
+  else if(n<=Math.min(30,Math.floor(t.prazo/2)))est='atencao';
+  else est='ok';
+  return {c,val,n,est,renovar:val?add(val,-t.ant):null,manual:!!c.validade};
+}
+function slug(s){return String(s).normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,120)||('emp-'+Date.now());}
+function ativos(){return EMP.filter(e=>st.arq||e.ativo!==false).sort((a,b)=>a.nome.localeCompare(b.nome,'pt'));}
+
+/* ---------- ui util ---------- */
+let tt;function toast(m){const t=$('#toast');t.textContent=m;t.hidden=false;clearTimeout(tt);tt=setTimeout(()=>t.hidden=true,3500);}
+function pill(est,txt){return '<span class="pill s-'+est+'">'+esc(txt||EST[est])+'</span>';}
+function view(v){document.querySelectorAll('#tabs button').forEach(b=>b.setAttribute('aria-selected',b.dataset.v===v));document.querySelectorAll('section.view').forEach(s=>s.hidden=s.id!=='v-'+v);if(v==='painel')requestAnimationFrame(desenhar);if(location.hash!=='#'+v)history.replaceState(null,'','#'+v);}
+$('#tabs').onclick=e=>{const b=e.target.closest('button');if(b)view(b.dataset.v);};
+addEventListener('hashchange',()=>{const v=location.hash.slice(1);if(document.getElementById('v-'+v))view(v);});
+
+/* ---------- render ---------- */
+function render(){renderPainel();renderGrid();renderSelects();}
+function linhas(){const out=[];ativos().forEach(e=>{if(e.ativo===false)return;TIPOS.forEach(t=>{const i=info(e,t.k);if(i.est==='sem'||i.est==='ok'||i.est==='subst')return;out.push({e,t,i});});});return out;}
+function renderPainel(){
+  requestAnimationFrame(desenhar);
+  const L=linhas();const cnt={venc:0,renovar:0,atencao:0,pend:0,and:0};L.forEach(x=>cnt[x.i.est]++);
+  $('#kpis').innerHTML=[['renovar','Renovar agora'],['venc','Vencidas'],['atencao','Vencem em 30 dias'],['pend','Pendências'],['and','Em andamento']].map(([k,l])=>'<button class="kpi" data-k="'+k+'" aria-pressed="'+(st.kpi===k)+'"><b class="mono">'+cnt[k]+'</b><span>'+l+'</span></button>').join('');
+  $('#filaTipos').innerHTML='<button class="chip" data-t="" aria-pressed="'+(!st.tipo)+'">Todas</button>'+TIPOS.map(t=>'<button class="chip" data-t="'+t.k+'" aria-pressed="'+(st.tipo===t.k)+'">'+t.a+'</button>').join('');
+  const ord={renovar:0,venc:1,pend:2,and:3,atencao:4};
+  let F=L.filter(x=>(!st.kpi||x.i.est===st.kpi)&&(!st.tipo||x.t.k===st.tipo)&&(!st.fbusca||x.e.nome.toLowerCase().includes(st.fbusca)));
+  F.sort((a,b)=>ord[a.i.est]-ord[b.i.est]||((a.i.val||'9')<(b.i.val||'9')?-1:1));
+  const tb=$('#fila');
+  if(!dbOk){tb.innerHTML='<tr><td colspan="7" class="empty">Carregando o controle…</td></tr>';return;}
+  if(!EMP.length){tb.innerHTML='<tr><td colspan="6" class="empty">Nenhuma empresa ainda. Vá em <b>Importar e backup</b> e importe a planilha, ou cadastre em <b>Empresas</b>.</td></tr>';return;}
+  if(!F.length){tb.innerHTML='<tr><td colspan="6" class="empty">Nada nesta fila. Tudo em dia.</td></tr>';return;}
+  tb.innerHTML=F.slice(0,400).map(x=>{const n=x.i.n;const d=n===null?'':(n<0?' · venceu há '+(-n)+'d':' · '+n+'d');
+    return '<tr data-e="'+esc(x.e.id)+'" data-t="'+x.t.k+'" style="cursor:pointer;--sev:var(--'+({venc:'bad',renovar:'warn',pend:'pend',and:'info',atencao:'warn'}[x.i.est])+')"><td class="name">'+esc(x.e.nome)+'</td><td>'+esc(x.t.n)+'</td><td class="mono">'+br(x.i.val)+(x.i.manual?' *':'')+'</td><td>'+pill(x.i.est,EST[x.i.est]+d)+'</td><td class="mono">'+br(x.i.renovar)+'</td><td class="small muted">'+esc([x.t.legado?'Renovar emitindo a CND Estadual RJ conjunta':'',x.i.c.status,x.i.c.obs].filter(Boolean).join(' · ').slice(0,140))+'</td><td>'+(LINKS[x.t.k]?'<a class="link emit" href="'+esc(LINKS[x.t.k])+'" target="_blank" rel="noopener" data-copy="'+esc(chaveDe(x.e,x.t.k))+'">Emitir</a>':'')+'</td></tr>';}).join('');
+  const H=HIST.slice(0,12);
+  $('#hist').innerHTML=H.length?H.map(h=>'<div style="padding:4px 0;border-bottom:1px solid var(--line)"><span class="mono muted">'+esc((h.em||'').slice(0,16).replace('T',' '))+'</span> · <b>'+esc(h.empresa)+'</b> · '+esc(h.texto)+'</div>').join(''):'<span class="muted">Os lançamentos aparecem aqui.</span>';
+  desenhar();
+}
+/* ---------- gráficos (canvas) ---------- */
+function cv(id,h){const c=$('#'+id);const dpr=window.devicePixelRatio||1;const w=c.clientWidth||c.parentElement.clientWidth;c.width=Math.round(w*dpr);c.height=Math.round(h*dpr);c.style.height=h+'px';const x=c.getContext('2d');x.setTransform(dpr,0,0,dpr,0,0);return {x,w,h};}
+function tok(n){return getComputedStyle(document.documentElement).getPropertyValue('--'+n).trim();}
+const ORDEM=[['ok','ok','Válida'],['atencao','warn','Vence em breve'],['renovar','warn','Renovar agora'],['venc','bad','Vencida'],['pend','pend','Pendência'],['and','info','Em andamento'],['sem','none','Sem dado']];
+let BARS=[];
+function desenhar(){
+  if(!dbOk)return;const act=EMP.filter(e=>e.ativo!==false);
+  const por=TIPOS.filter(t=>!t.legado).map(t=>{const c={ok:0,atencao:0,renovar:0,venc:0,pend:0,and:0,sem:0};act.forEach(e=>{const i=info(e,t.k);if(c[i.est]!==undefined)c[i.est]++;});return {t,c};});
+  let em=0,tot=0;por.forEach(p=>{em+=p.c.ok+p.c.atencao+p.c.and;tot+=p.c.ok+p.c.atencao+p.c.and+p.c.renovar+p.c.venc+p.c.pend;});
+  const pct=tot?Math.round(em*100/tot):0;$('#ringPct').textContent=tot?pct+'%':'–';
+  {const {x}=cv('ring',170);const cx=85,cy=85,r=70;x.lineWidth=16;x.lineCap='round';x.strokeStyle=tok('surface2');x.beginPath();x.arc(cx,cy,r,0,Math.PI*2);x.stroke();
+   if(tot){x.strokeStyle=tok(pct>=80?'ok':pct>=60?'warn':'bad');x.beginPath();x.arc(cx,cy,r,-Math.PI/2,-Math.PI/2+Math.PI*2*pct/100);x.stroke();}}
+  const cards=por.map(p=>({p,agir:p.c.renovar+p.c.venc+p.c.pend,emdia:p.c.ok+p.c.atencao+p.c.and,sem:p.c.sem})).sort((a,b)=>b.agir-a.agir||b.emdia-a.emdia);
+  const g=$('#tgrid');g.innerHTML=cards.map(c=>{const tot=c.agir+c.emdia;const v=tot?(c.agir?'<div class="tv bad mono">'+c.agir+' para agir</div>':'<div class="tv good">Tudo em dia</div>'):'<div class="tv nil">Sem lançamentos</div>';
+    return '<button class="tcard" data-t="'+c.p.t.k+'" aria-pressed="'+(st.tipo===c.p.t.k)+'"><canvas width="112" height="112"></canvas><div><div class="tn">'+esc(c.p.t.n)+'</div>'+v+'<div class="ts">'+c.emdia+' em dia'+(c.p.c.and?' ('+c.p.c.and+' pedidas)':'')+' · '+c.sem+' sem dado</div></div></button>';}).join('');
+  [...g.querySelectorAll('canvas')].forEach((cvs,i)=>{const c=cards[i];const x=cvs.getContext('2d');x.setTransform(2,0,0,2,0,0);const segs=[[c.p.c.ok+c.p.c.atencao,'ok'],[c.p.c.and,'info'],[c.p.c.pend,'pend'],[c.p.c.renovar,'warn'],[c.p.c.venc,'bad']];const tot=segs.reduce((a,b)=>a+b[0],0);
+    x.lineWidth=7;x.strokeStyle=tok('surface2');x.beginPath();x.arc(28,28,22,0,Math.PI*2);x.stroke();if(!tot)return;
+    let a0=-Math.PI/2;const gap=segs.filter(s=>s[0]).length>1?.06:0;segs.forEach(([v,col])=>{if(!v)return;const a1=a0+v/tot*Math.PI*2;x.strokeStyle=tok(col);x.beginPath();x.arc(28,28,22,a0+gap/2,Math.max(a0+gap/2+.01,a1-gap/2));x.stroke();a0=a1;});
+    x.fillStyle=tok('ink');x.font='600 12px '+tok('f-mono');x.textAlign='center';x.textBaseline='middle';x.fillText(Math.round((c.emdia)*100/tot)+'%',28,29);});
+}
+$('#tgrid').onclick=e=>{const b=e.target.closest('.tcard');if(!b)return;st.tipo=st.tipo===b.dataset.t?null:b.dataset.t;renderPainel();document.querySelector('#fila').scrollIntoView({behavior:'smooth',block:'nearest'});};
+let rz;addEventListener('resize',()=>{clearTimeout(rz);rz=setTimeout(desenhar,120);});
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change',()=>{desenhar();logo();});
+function logo(){const c=$('#logo');const x=c.getContext('2d');x.clearRect(0,0,80,80);const g='#5fd0ae';x.strokeStyle=g;x.fillStyle=g;x.lineWidth=3;x.beginPath();x.arc(40,40,34,0,Math.PI*2);x.stroke();x.lineWidth=1.5;x.beginPath();x.arc(40,40,27,0,Math.PI*2);x.stroke();
+  for(let i=0;i<24;i++){const a=i/24*Math.PI*2;x.beginPath();x.moveTo(40+Math.cos(a)*29,40+Math.sin(a)*29);x.lineTo(40+Math.cos(a)*32,40+Math.sin(a)*32);x.stroke();}
+  x.lineWidth=5;x.lineCap='round';x.lineJoin='round';x.beginPath();x.moveTo(28,41);x.lineTo(37,50);x.lineTo(54,31);x.stroke();}
+logo();
+$('#kpis').onclick=e=>{const b=e.target.closest('.kpi');if(!b)return;st.kpi=st.kpi===b.dataset.k?null:b.dataset.k;renderPainel();};
+$('#filaTipos').onclick=e=>{const b=e.target.closest('.chip');if(!b)return;st.tipo=b.dataset.t||null;renderPainel();};
+$('#filaBusca').oninput=e=>{st.fbusca=e.target.value.toLowerCase();renderPainel();};
+$('#fila').onclick=e=>{const r=e.target.closest('tr[data-e]');if(r)editCert(r.dataset.e,r.dataset.t);};
+
+function renderGrid(){
+  $('#legenda').innerHTML=['renovar','venc','atencao','pend','and','ok','sem'].map(k=>pill(k)).join('')+'<span class="muted">Clique numa célula para lançar · * validade informada manualmente · SEFAZ* e PGE* são as certidões antigas, de antes da unificação; as novas vão em EST-RJ</span>';
+  $('#gridHead').innerHTML='<tr><th>Empresa</th>'+TIPOS.map(t=>'<th title="'+esc(t.n)+'">'+t.a+'</th>').join('')+'</tr>';
+  const q=st.busca;const L=ativos().filter(e=>!q||[e.nome,e.razao,e.cnpj,e.im].join(' ').toLowerCase().includes(q));
+  if(!dbOk){$('#grid').innerHTML='<tr><td colspan="15" class="empty">Carregando…</td></tr>';return;}
+  if(!L.length){$('#grid').innerHTML='<tr><td colspan="15" class="empty">'+(EMP.length?'Nenhuma empresa encontrada.':'Nenhuma empresa cadastrada. Importe a planilha ou clique em Nova empresa.')+'</td></tr>';return;}
+  $('#grid').innerHTML=L.map(e=>'<tr><td class="name"><button data-emp="'+esc(e.id)+'">'+esc(e.nome)+'</button>'+(e.ativo===false?' <span class="pill s-sem">arquivada</span>':'')+'</td>'+TIPOS.map(t=>{const i=info(e,t.k);const lab=i.est==='subst'?'→EST':i.val?(i.n<0?'venc':i.n+'d'):(i.est==='sem'?'—':(i.est==='pend'?'pend':'and'));return '<td class="c"><button class="cell s-'+i.est+'" data-e="'+esc(e.id)+'" data-t="'+t.k+'" title="'+esc(t.n+' · '+(i.val?'válida até '+br(i.val):EST[i.est])+(i.c.status?' · '+i.c.status:''))+'">'+lab+(i.manual?'*':'')+'</button></td>';}).join('')+'</tr>').join('');
+}
+$('#busca').oninput=e=>{st.busca=e.target.value.toLowerCase().trim();renderGrid();};
+$('#verArq').onchange=e=>{st.arq=e.target.checked;render();};
+$('#grid').onclick=e=>{const c=e.target.closest('.cell');if(c)return editCert(c.dataset.e,c.dataset.t);const n=e.target.closest('[data-emp]');if(n)abrirEmpresa(n.dataset.emp);};
+
+function renderSelects(){
+  const cur=$('#mEmp').value;$('#mEmp').innerHTML='<option value="">Escolha…</option>'+ativos().filter(e=>e.ativo!==false).map(e=>'<option value="'+esc(e.id)+'">'+esc(e.nome)+'</option>').join('');$('#mEmp').value=cur;
+  if(!$('#mTipo').options.length)$('#mTipo').innerHTML=TIPOS.map(t=>'<option value="'+t.k+'">'+esc(t.n)+'</option>').join('');
+  if(!document.activeElement||!document.activeElement.closest('#links'))$('#links').innerHTML=TIPOS.map(t=>'<label class="f">'+esc(t.n)+'<input data-lk="'+t.k+'" value="'+esc(LINKS[t.k]||'')+'" placeholder="https://…"></label>').join('');
+  $('#prazos').innerHTML=TIPOS.map(t=>'<tr><td>'+esc(t.n)+'</td><td class="mono">'+t.prazo+' dias</td><td class="mono">'+t.ant+' dias antes</td></tr>').join('');
+}
+
+/* ---------- dialog ---------- */
+const dlg=$('#dlg');$('#dX').onclick=()=>dlg.close();
+function abrir(t,body,foot){$('#dT').textContent=t;$('#dB').innerHTML=body;$('#dF').innerHTML=foot||'';dlg.showModal();}
+function emp(id){return EMP.find(e=>e.id===id);}
+
+function editCert(id,k){
+  const e=emp(id);if(!e)return;const t=TK[k];const i=info(e,k);const c=i.c;
+  abrir(e.nome+' · '+t.n,
+   '<div class="row">'+pill(i.est,EST[i.est])+'<span class="small muted">Prazo padrão '+prazoDe(e,k)+' dias · renovar '+t.ant+' dias antes</span></div>'+
+   '<div class="row">'+emitirHTML(e,k)+'</div>'+
+   '<div class="formgrid"><label class="f">Data de emissão<input type="date" id="eEmi" value="'+esc(c.emissao||'')+'"></label>'+
+   '<label class="f">Situação<input id="eSt" value="'+esc(c.status||'')+'" placeholder="NEGATIVA, PRONTO EM…"></label></div>'+
+   '<label class="row small"><input type="checkbox" id="eVOn" '+(c.validade?'checked':'')+'> Validade diferente do prazo padrão (ex.: certidão de regularização)</label>'+
+   '<label class="f" id="eVBox" '+(c.validade?'':'hidden')+'>Validade real<input type="date" id="eVal" value="'+esc(c.validade||'')+'"></label>'+
+   '<label class="f">Observação<textarea id="eObs" style="min-height:70px">'+esc(c.obs||'')+'</textarea></label>'+
+   '<p class="small" id="eCalc"></p>',
+   '<button class="btn" id="eClr">Limpar certidão</button><button class="btn pri" id="eOk">Salvar</button>');
+  const calc=()=>{const v=$('#eVOn').checked?$('#eVal').value:($('#eEmi').value?add($('#eEmi').value,prazoDe(e,k)):'');$('#eCalc').innerHTML=v?'Válida até <b class="mono">'+br(v)+'</b> · renovar a partir de <b class="mono">'+br(add(v,-t.ant))+'</b>':'<span class="muted">Informe a data de emissão para calcular a validade.</span>';};
+  ['eEmi','eVal'].forEach(x=>$('#'+x).oninput=calc);$('#eVOn').onchange=()=>{$('#eVBox').hidden=!$('#eVOn').checked;calc();};calc();
+  $('#eOk').onclick=async()=>{await salvarCert(id,k,{emissao:$('#eEmi').value||null,validade:$('#eVOn').checked&&$('#eVal').value?$('#eVal').value:null,status:$('#eSt').value.trim(),obs:$('#eObs').value.trim()});dlg.close();};
+  $('#eClr').onclick=async()=>{await salvarCert(id,k,{emissao:null,validade:null,status:'',obs:''});dlg.close();};
+}
+
+function abrirEmpresa(id){
+  const e=emp(id);if(!e)return;
+  const kv=[['Razão social',e.razao],['CNPJ',e.cnpj],['Inscrição municipal',e.im],['Inscrição estadual',e.ie],['Natureza / registro',e.natureza],['Endereço',[e.endereco,e.bairro,e.cidade,e.uf,e.cep].filter(Boolean).join(', ')],['Telefone',e.tel],['E-mail',e.email],['Observações',e.obs]];
+  abrir(e.nome,'<div class="kv">'+kv.map(([k,v])=>'<div><span>'+k+'</span>'+(v?esc(v):'<span class="muted" style="text-transform:none;letter-spacing:0">—</span>')+'</div>').join('')+'</div>'+
+   '<div class="scroll"><table><thead><tr><th>Certidão</th><th>Emissão</th><th>Validade</th><th>Situação</th></tr></thead><tbody>'+TIPOS.map(t=>{const i=info(e,t.k);return '<tr data-t="'+t.k+'" style="cursor:pointer"><td>'+esc(t.n)+'</td><td class="mono">'+br(i.c.emissao)+'</td><td class="mono">'+br(i.val)+(i.manual?' *':'')+'</td><td>'+pill(i.est,i.c.status||EST[i.est])+'</td></tr>';}).join('')+'</tbody></table></div>',
+   '<button class="btn danger" id="eArq">'+(e.ativo===false?'Reativar':'Arquivar (não é mais cliente)')+'</button><button class="btn pri" id="eEd">Editar cadastro</button>');
+  $('#dB').querySelector('tbody').onclick=ev=>{const r=ev.target.closest('tr[data-t]');if(r){dlg.close();editCert(id,r.dataset.t);}};
+  $('#eEd').onclick=()=>formEmpresa(e);
+  $('#eArq').onclick=async()=>{await salvarEmp(e.id,{ativo:e.ativo===false},e.ativo===false?'empresa reativada':'empresa arquivada');dlg.close();};
+}
+const CAMPOS=[['nome','Nome curto'],['razao','Razão social'],['cnpj','CNPJ'],['im','Inscrição municipal'],['ie','Inscrição estadual'],['natureza','Natureza / registro (JUCERJA ou RCPJ)'],['cep','CEP'],['endereco','Endereço'],['bairro','Bairro'],['cidade','Cidade'],['uf','UF'],['tel','Telefone'],['email','E-mail'],['obs','Observações']];
+function formEmpresa(e){
+  const n=!e;e=e||{};
+  abrir(n?'Nova empresa':'Editar '+e.nome,'<div class="formgrid">'+CAMPOS.map(([k,l])=>'<label class="f">'+l+'<input id="c_'+k+'" value="'+esc(e[k]||'')+'"></label>').join('')+'</div>','<button class="btn pri" id="cOk">Salvar</button>');
+  $('#cOk').onclick=async()=>{const d={};CAMPOS.forEach(([k])=>d[k]=$('#c_'+k).value.trim());if(!d.nome)return toast('Informe o nome da empresa.');
+    d.prazos=Object.assign({},e.prazos||{});delete d.prazos.SEFAZ;
+    if(n){const id=slug(d.nome);if(emp(id))return toast('Já existe uma empresa com esse nome.');d.certs={};d.ativo=true;await gravar(id,d,'empresa cadastrada',d.nome);}
+    else await salvarEmp(e.id,d,'cadastro atualizado');dlg.close();};
+}
+$('#novaEmp').onclick=()=>formEmpresa(null);
+
+/* ---------- gravação ---------- */
+async function gravar(id,data,texto,nome){
+  data.atualizadoEm=new Date().toISOString();
+  const {error}=await sb.from('empresas').upsert({id,data});if(error){toast('Não salvou: '+error.message);return false;}
+  const i=EMP.findIndex(e=>e.id===id);const o=Object.assign({id},data);if(i>=0)EMP[i]=o;else EMP.push(o);render();
+  log(nome||data.nome,texto);return true;
+}
+async function salvarEmp(id,patch,texto){const e=emp(id);const d=Object.assign({},strip(e),patch);return gravar(id,d,texto,d.nome);}
+function strip(e){const d=Object.assign({},e);delete d.id;return d;}
+async function salvarCert(id,k,c,silent){
+  const e=emp(id);const certs=Object.assign({},e.certs||{});
+  if(!c.emissao&&!c.validade&&!c.status&&!c.obs)delete certs[k];else certs[k]=Object.assign({},c,{em:new Date().toISOString()});
+  const val=c.validade||(c.emissao?add(c.emissao,prazoDe(e,k)):null);
+  const ok=await gravar(id,Object.assign(strip(e),{certs}),TK[k].a+': '+(c.emissao?'emitida '+br(c.emissao)+(val?', válida até '+br(val):''):'')+(c.status?' · '+c.status:''),e.nome);
+  if(ok){e.certs=certs;if(!silent){toast('Salvo: '+e.nome+' · '+TK[k].a);render();}}
+  return ok;
+}
+async function log(empresa,texto){const h={empresa,texto,em:new Date().toISOString()};HIST.unshift(h);try{await sb.from('historico').insert(h);}catch(e){}}
+
+/* ---------- manual ---------- */
+function mCalc(){const id=$('#mEmp').value,k=$('#mTipo').value,e=emp(id);const v=$('#mValOn').checked?$('#mVal').value:(e&&$('#mEmi').value?add($('#mEmi').value,prazoDe(e,k)):'');$('#mCalc').textContent=v?'Válida até '+br(v)+' · renovar a partir de '+br(add(v,-TK[k].ant)):'';}
+['mEmp','mTipo','mEmi','mVal'].forEach(x=>$('#'+x).addEventListener('input',mCalc));
+$('#mValOn').onchange=()=>{$('#mValBox').hidden=!$('#mValOn').checked;mCalc();};
+$('#mEmi').value=hojeISO();
+$('#mSave').onclick=async()=>{const id=$('#mEmp').value;if(!id)return toast('Escolha a empresa.');const k=$('#mTipo').value;const old=(emp(id).certs||{})[k]||{};
+  const ok=await salvarCert(id,k,{emissao:$('#mEmi').value||null,validade:$('#mValOn').checked&&$('#mVal').value?$('#mVal').value:null,status:$('#mStatus').value.trim(),obs:$('#mObs').value.trim()||old.obs||''});
+  if(ok){$('#mStatus').value='';$('#mObs').value='';mCalc();}};
+
+/* ---------- arquivos (PDF / imagem) ---------- */
+let FILES=[];
+function loadScript(src){return new Promise((r,j)=>{if(document.querySelector('script[src="'+src+'"]'))return r();const s=document.createElement('script');s.src=src;s.onload=r;s.onerror=()=>j(new Error('Falha ao carregar '+src));document.head.appendChild(s);});}
+async function pdfText(file){
+  await loadScript('https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js');
+  await loadScript('https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js');
+  const pdf=await window.pdfjsLib.getDocument({data:new Uint8Array(await file.arrayBuffer())}).promise;let out='';
+  for(let p=1;p<=Math.min(pdf.numPages,4);p++){const pg=await pdf.getPage(p);const tc=await pg.getTextContent();out+=tc.items.map(i=>i.str).join(' ')+'\n';}
+  return out.replace(/\s+/g,' ').trim().slice(0,6000);
+}
+function showFiles(){$('#lFileList').innerHTML=FILES.map((f,i)=>'<span class="chip" aria-pressed="false">'+esc(f.name)+' <button class="link" data-i="'+i+'" aria-label="Remover">×</button></span>').join('');}
+$('#lFileList').onclick=e=>{const b=e.target.closest('[data-i]');if(b){FILES.splice(+b.dataset.i,1);showFiles();}};
+$('#pick').onclick=()=>$('#lFiles').click();
+$('#lFiles').onchange=e=>{FILES.push(...e.target.files);e.target.value='';showFiles();};
+const drop=$('#drop');drop.ondragover=e=>{e.preventDefault();drop.classList.add('over');};drop.ondragleave=()=>drop.classList.remove('over');
+drop.ondrop=e=>{e.preventDefault();drop.classList.remove('over');FILES.push(...[...e.dataTransfer.files].filter(f=>/pdf|image/.test(f.type)));showFiles();};
+
+/* ---------- lançar com Claude ---------- */
+let REV=[],lCtl;
+function listaEmpresas(){return ativos().filter(e=>e.ativo!==false).map(e=>e.nome+' | '+(e.razao||'')+' | CNPJ '+(e.cnpj||'')+' | IM '+(e.im||'')).join('\n');}
+const ERRMSG={not_granted:'Sem permissão para usar a IA.',rate_limited:'Muitos pedidos seguidos. Espere um minuto.',prompt_too_large:'Texto ou arquivos grandes demais. Envie menos de cada vez.',images_unavailable:'A IA deste app lê PDF e texto, não fotos. Envie o PDF ou escreva os dados.',upstream_error:'A IA não respondeu. Confira se a chave da IA está configurada no Supabase.',cancelled:'Interrompido.'};
+$('#lStop').onclick=()=>lCtl&&lCtl.abort();
+$('#lGo').onclick=async()=>{
+  if(!sample)return toast('O Claude não está disponível nesta visualização.');
+  const txt=$('#lText').value.trim();if(!txt&&!FILES.length)return toast('Escreva algo ou anexe uma certidão.');
+  const btn=$('#lGo');btn.disabled=true;$('#lStop').hidden=false;$('#lMsg').textContent='Lendo arquivos…';
+  try{
+    let docs='';const imgs=[];
+    for(const f of FILES){if(/pdf/.test(f.type)){try{docs+='\n\n=== ARQUIVO '+f.name+' ===\n'+await pdfText(f);}catch(err){docs+='\n\n=== ARQUIVO '+f.name+' (não foi possível ler o texto) ===';}}else imgs.push(f);}
+    $('#lMsg').textContent='A IA está lendo…';lCtl=new AbortController();
+    const prompt='Você é o assistente do Departamento de Legalização da Jopec (Rio de Janeiro). Hoje é '+br(hojeISO())+'. Transforme o texto e os documentos abaixo em lançamentos de certidões.\n\n'+
+     'TIPOS (use a chave):\n'+TIPOS.map(t=>t.k+' = '+t.n+' (validade padrão '+t.prazo+' dias)').join('\n')+
+     '\nDicas: "CND conjunta", "Receita Federal", "PGFN" = RFB. A certidão estadual do RJ agora é única e conjunta (SEFAZ + PGE, validade 30 dias): "SEFAZ", "ICMS", "Fazenda Estadual", "PGE", "Dívida Ativa Estadual", "certidão conjunta estadual" = EST. "ISS", "Certidão Negativa de Débitos de ISS", "Prefeitura - tributos mobiliários" = ISS. "PGM", "Procuradoria Geral do Município", "dívida ativa municipal" = PGM. "CRF", "Caixa", "FGTS" = FGTS. "CNDT", "TST", "Justiça do Trabalho" = TRAB. "Falência", "concordata", "recuperação judicial" = FAL. "Ações cíveis", "distribuição cível", "cível" do TJ-RJ = CIV.\n\n'+
+     'EMPRESAS (nome curto | razão social | CNPJ | IM):\n'+listaEmpresas()+'\n\n'+
+     'TEXTO DO USUÁRIO:\n'+(txt||'(sem texto)')+(docs?'\n\nCONTEÚDO DOS PDFs:'+docs:'')+(imgs.length?'\n\nHá '+imgs.length+' imagem(ns) anexada(s) com certidões.':'')+
+     '\n\nResponda SÓ com JSON: {"itens":[{"empresa":"nome curto EXATO da lista","tipo":"CHAVE","emissao":"AAAA-MM-DD ou null","validade":"AAAA-MM-DD só se o documento trouxer validade explícita, senão null","status":"curto, ex.: NEGATIVA, POSITIVA COM EFEITO DE NEGATIVA, POSITIVA, SOLICITADA - PRONTO EM 01/12/2026, SOLICITAR VIA AGENDAMENTO","obs":"protocolo, código de controle, autenticação, o que for útil"}],"duvidas":["o que não deu para identificar"]}. Identifique a empresa pelo CNPJ quando houver. "Hoje" = '+hojeISO()+'. Não invente datas.';
+    const opts={signal:lCtl.signal,modelTier:'default'};if(imgs.length)opts.images=imgs;
+    const r=await sample.json(prompt,opts);
+    REV=(r.itens||[]).map(x=>{const e=EMP.find(e=>e.nome===x.empresa)||EMP.find(e=>e.nome.toLowerCase()===String(x.empresa||'').toLowerCase());return {ok:!!(e&&TK[x.tipo]),id:e?e.id:'',tipo:TK[x.tipo]?x.tipo:'RFB',emissao:x.emissao||'',validade:x.validade||'',status:x.status||'',obs:x.obs||'',nomeLido:x.empresa};});
+    renderRev(r.duvidas||[]);$('#lMsg').textContent=REV.length?REV.length+' lançamento(s) para conferir.':'Nada identificado.';
+  }catch(e){$('#lMsg').textContent=ERRMSG[e.code]||('Não deu certo: '+(e.message||e.code));}
+  finally{btn.disabled=false;$('#lStop').hidden=true;}
+};
+function renderRev(duv){
+  $('#revBox').hidden=!REV.length;$('#revNotes').hidden=!duv.length;$('#revNotes').textContent=duv.length?'Dúvidas da IA: '+duv.join(' · '):'';
+  const opE='<option value="">— escolha —</option>'+ativos().filter(e=>e.ativo!==false).map(e=>'<option value="'+esc(e.id)+'">'+esc(e.nome)+'</option>').join('');
+  $('#rev').innerHTML=REV.map((r,i)=>'<tr data-i="'+i+'"><td><input type="checkbox" data-f="ok" '+(r.ok?'checked':'')+' aria-label="Incluir"></td><td><select data-f="id">'+opE+'</select>'+(r.id?'':'<div class="small" style="color:var(--bad)">Lido: '+esc(r.nomeLido)+'</div>')+'</td><td><select data-f="tipo">'+TIPOS.map(t=>'<option value="'+t.k+'">'+t.a+'</option>').join('')+'</select></td><td><input type="date" data-f="emissao" value="'+esc(r.emissao)+'"></td><td><input type="date" data-f="validade" value="'+esc(r.validade)+'"></td><td><input data-f="status" value="'+esc(r.status)+'"></td><td><input data-f="obs" value="'+esc(r.obs)+'"></td></tr>').join('');
+  [...$('#rev').rows].forEach((tr,i)=>{tr.querySelector('[data-f=id]').value=REV[i].id;tr.querySelector('[data-f=tipo]').value=REV[i].tipo;});
+}
+$('#rev').oninput=e=>{const tr=e.target.closest('tr');const f=e.target.dataset.f;REV[+tr.dataset.i][f]=e.target.type==='checkbox'?e.target.checked:e.target.value;};
+$('#revCancel').onclick=()=>{REV=[];$('#revBox').hidden=true;};
+$('#revSave').onclick=async()=>{
+  const L=REV.filter(r=>r.ok&&r.id);if(!L.length)return toast('Marque ao menos um lançamento com empresa.');
+  $('#revSave').disabled=true;let n=0;
+  for(const r of L){const e=emp(r.id);let val=r.validade||null;
+    if(val&&r.emissao&&Math.abs(dias(val)-dias(add(r.emissao,prazoDe(e,r.tipo))))<=1)val=null; // igual ao padrão: deixa a fórmula
+    const old=(e.certs||{})[r.tipo]||{};
+    if(await salvarCert(r.id,r.tipo,{emissao:r.emissao||(r.emissao===''&&!val?old.emissao||null:null),validade:val,status:r.status,obs:r.obs||old.obs||''},true))n++;}
+  $('#revSave').disabled=false;REV=[];$('#revBox').hidden=true;$('#lText').value='';FILES=[];showFiles();render();toast(n+' lançamento(s) salvos.');
+};
+
+/* ---------- perguntar ---------- */
+const SUGS=['Quais certidões posso pedir hoje?','Quais PGM vencem nos próximos 30 dias?','Liste as pendências de ISS que precisam de agendamento','Resumo da situação de todas as empresas'];
+$('#sugs').innerHTML=SUGS.map(s=>'<button class="chip">'+esc(s)+'</button>').join('');
+$('#sugs').onclick=e=>{const b=e.target.closest('.chip');if(b){$('#qText').value=b.textContent;$('#qGo').click();}};
+let qCtl;$('#qStop').onclick=()=>qCtl&&qCtl.abort();
+function resumoEmp(e){return {nome:e.nome,razao:e.razao,cnpj:e.cnpj,im:e.im,natureza:e.natureza,cidade:e.cidade,obs:e.obs,certidoes:TIPOS.map(t=>{const i=info(e,t.k);return {tipo:t.n,emissao:i.c.emissao||null,validade:i.val,situacao:EST[i.est],status:i.c.status||'',obs:(i.c.obs||'').slice(0,200),renovarAPartirDe:i.renovar};})};}
+$('#qGo').onclick=async()=>{
+  if(!sample)return toast('O Claude não está disponível nesta visualização.');
+  const q=$('#qText').value.trim();if(!q)return;
+  $('#qGo').disabled=true;$('#qStop').hidden=false;$('#qAns').hidden=false;$('#qAns').textContent='Pensando…';$('#qMsg').textContent='';qCtl=new AbortController();
+  const fila=linhas().map(x=>x.e.nome+' | '+x.t.n+' | validade '+br(x.i.val)+' | '+EST[x.i.est]+' | renovar a partir de '+br(x.i.renovar)+(x.i.c.status?' | '+x.i.c.status:'')).join('\n');
+  const prompt='Você é o assistente do Departamento de Legalização da Jopec (Rio de Janeiro), responsável pelas certidões negativas dos clientes. Hoje é '+br(hojeISO())+'. Responda em português do Brasil, direto e organizado em listas curtas. Regras da casa: a CND estadual do RJ agora é única e conjunta (Fazenda Estadual + PGE), vale 30 dias e é renovada 5 dias antes; PGM 14 dias antes; demais conforme a validade. Use a ferramenta buscar_empresa para detalhes (cadastro, inscrições, natureza jurídica, todas as certidões).\n\nEMPRESAS: '+ativos().filter(e=>e.ativo!==false).map(e=>e.nome).join('; ')+'\n\nFILA (tudo que não está válido com folga):\n'+(fila||'(vazia)')+'\n\nPERGUNTA: '+q;
+  const tools=[{name:'buscar_empresa',description:'Dados completos de uma empresa: cadastro e as 14 certidões com emissão, validade e situação.',inputSchema:{type:'object',properties:{nome:{type:'string',description:'Nome ou parte do nome, razão social ou CNPJ'}},required:['nome']},execute:({nome})=>{const dig=String(nome).replace(/\D/g,'');const s=dig.length>=8?dig:null;const L=EMP.filter(e=>s?String(e.cnpj||'').replace(/\D/g,'').includes(s):[e.nome,e.razao].join(' ').toLowerCase().includes(String(nome).toLowerCase()));$('#qMsg').textContent='Consultando '+nome+'…';if(!L.length)throw new Error('Empresa não encontrada: '+nome);return L.slice(0,3).map(resumoEmp);}}];
+  try{await sample(prompt,{signal:qCtl.signal,tools,cache:false,onText:({text})=>{$('#qAns').textContent=text;}});$('#qMsg').textContent='';}
+  catch(e){if(e.text)$('#qAns').textContent=e.text;$('#qMsg').textContent=ERRMSG[e.code]||('Não deu certo: '+(e.message||e.code));}
+  finally{$('#qGo').disabled=false;$('#qStop').hidden=true;}
+};
+
+/* ---------- importar xlsx ---------- */
+let IMP=null;
+function xdate(v){if(v==null||v==='')return null;if(v instanceof Date&&!isNaN(v))return iso(new Date(v.getFullYear(),v.getMonth(),v.getDate()+(v.getHours()>=12?1:0)));if(typeof v==='number'){const d=new Date(Math.round((v-25569)*864e5));return iso(new Date(d.getUTCFullYear(),d.getUTCMonth(),d.getUTCDate()));}return brToIso(String(v));}
+function tipoDe(doc){doc=String(doc||'');for(const t of TIPOS)if(t.m.some(m=>doc.toLowerCase().includes(m.toLowerCase())))return t.k;return null;}
+$('#xFile').onchange=async e=>{
+  const f=e.target.files[0];if(!f)return;$('#xMsg').textContent='Lendo…';$('#xGo').disabled=true;
+  try{
+    await loadScript('https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js');
+    const wb=XLSX.read(await f.arrayBuffer(),{cellDates:true});const out={};const cad={};
+    wb.SheetNames.forEach(sn=>{const ws=wb.Sheets[sn];const R=XLSX.utils.sheet_to_json(ws,{header:1,raw:true,defval:''});
+      if(/CADASTRO/i.test(sn)){R.slice(1).forEach(r=>{if(!r[0])return;cad[String(r[0]).trim()]={razao:r[1],cnpj:r[2],im:r[3],ie:r[4],cep:r[5],endereco:[r[6],r[7],r[8]].filter(Boolean).join(', '),bairro:r[9],cidade:r[10],uf:r[11],tel:r[12],email:r[13],obs:r[14],natureza:r[15]};});return;}
+      if(/PAINEL|ALERTA|INSTRU|NOVA EMPRESA|Licen|Hist/i.test(sn))return;
+      const h=R.findIndex(r=>String(r[0]).trim()==='DOCUMENTO');if(h<0)return;
+      const nome=(String((R[2]||[])[0]).match(/EMPRESA:\s*(.+)/)||[])[1]?.trim()||sn.trim();
+      const cn=(String((R[3]||[])[0]).match(/CNPJ:\s*([\d./-]+)/)||[])[1]||'';const rz=(String((R[3]||[])[0]).split('|')[1]||'').trim();
+      const im=(String((R[4]||[])[0]).match(/MUNICIPAL:\s*([^|]+)/)||[])[1]?.trim()||'';
+      const certs={};
+      for(let i=h+1;i<R.length;i++){const r=R[i];const k=tipoDe(r[0]);if(!k||certs[k])continue;
+        const emi=xdate(r[1]),val=xdate(r[2]),s=String(r[4]||'').trim(),o=String(r[5]||'').trim();if(!emi&&!val&&!s&&!o)continue;
+        const c={emissao:emi,validade:null,status:s,obs:o.slice(0,1500)};
+        if(k==='SEFAZ'&&emi&&val){const pz=Math.round((pd(val)-pd(emi))/864e5);if(pz===30||pz===90){c.validade=val;certs[k]=c;continue;}} // prazo antigo da planilha (30 ou 90)
+        const padrao=emi?add(emi,TK[k].prazo):null;
+        if(val&&(!emi||Math.abs(dias(val)-dias(padrao))>1)){if(emi)c.validade=val;else{c.emissao=add(val,-TK[k].prazo);c.obs=(c.obs?c.obs+' | ':'')+'Emissão calculada pela validade na importação.';}}
+        certs[k]=c;}
+      out[nome]={nome,razao:rz,cnpj:cn,im,certs};
+    });
+    Object.keys(out).forEach(n=>{const c=cad[n];if(c)Object.keys(c).forEach(k=>{if(c[k]!==''&&c[k]!=null)out[n][k]=String(c[k]);});});
+    IMP=Object.values(out);
+    const novos=IMP.filter(x=>!emp(slug(x.nome))).length;
+    $('#xPrev').innerHTML='<p><b>'+IMP.length+'</b> empresas encontradas ('+novos+' novas, '+(IMP.length-novos)+' já existentes) e <b>'+IMP.reduce((s,x)=>s+Object.keys(x.certs).length,0)+'</b> certidões. Nas existentes, cada certidão só é trocada se a da planilha for mais recente.</p>';
+    $('#xGo').disabled=!IMP.length;$('#xMsg').textContent='';
+  }catch(err){$('#xMsg').textContent='Não consegui ler: '+err.message;}
+};
+$('#xGo').onclick=async()=>{
+  if(!IMP)return;$('#xGo').disabled=true;let n=0;
+  for(const x of IMP){const id=slug(x.nome);const e=emp(id);let d;
+    if(!e)d=Object.assign({ativo:true,prazos:{}},x);
+    else{d=strip(e);['razao','cnpj','im','ie','cep','endereco','bairro','cidade','uf','tel','email','natureza'].forEach(k=>{if(x[k]&&!d[k])d[k]=x[k];});d.certs=Object.assign({},e.certs||{});
+      Object.entries(x.certs).forEach(([k,c])=>{const o=d.certs[k];if(!o||((c.emissao||'')>(o.emissao||'')))d.certs[k]=c;});}
+    d.atualizadoEm=new Date().toISOString();
+    {const {error}=await sb.from('empresas').upsert({id,data:d});if(!error){n++;const i=EMP.findIndex(e=>e.id===id);if(i>=0)EMP[i]=Object.assign({id},d);else EMP.push(Object.assign({id},d));}}
+    $('#xMsg').textContent='Importando '+n+'/'+IMP.length+'…';}
+  log('Importação','planilha importada: '+n+' empresas');$('#xMsg').textContent=n+' empresas importadas.';IMP=null;toast('Importação concluída.');
+};
+
+$('#linksSave').onclick=async()=>{const d={};document.querySelectorAll('[data-lk]').forEach(i=>{const v=i.value.trim();if(v&&!/^https:\/\//.test(v))return;if(v)d[i.dataset.lk]=v;});
+  const {error}=await sb.from('config').upsert({id:'links',data:{links:d}});if(error)return toast('Não salvou: '+error.message);LINKS=Object.assign({},LINKS0,d);toast('Endereços salvos.');render();};
+/* ---------- backup ---------- */
+function baixar(nome,data){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([data],{type:nome.endsWith('.csv')?'text/csv;charset=utf-8':'application/json'}));a.download=nome;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},1000);}
+$('#bJson').onclick=()=>baixar('certidoes-jopec-'+hojeISO()+'.json',JSON.stringify(EMP.map(strip),null,1));
+$('#bCsv').onclick=()=>{const q=v=>'"'+String(v??'').replace(/"/g,'""')+'"';const L=[['Empresa','CNPJ','Certidão','Emissão','Validade','Situação','Status','Observação'].map(q).join(';')];
+  ativos().forEach(e=>TIPOS.forEach(t=>{const i=info(e,t.k);if(i.est==='sem'&&!i.c.obs)return;L.push([e.nome,e.cnpj,t.n,br(i.c.emissao),br(i.val),EST[i.est],i.c.status,i.c.obs].map(q).join(';'));}));
+  baixar('certidoes-jopec-'+hojeISO()+'.csv','﻿'+L.join('\n'));};
+
+/* ---------- boot ---------- */
+render();
+const v0=location.hash.slice(1);if(document.getElementById('v-'+v0))view(v0);
+async function carregar(){
+  const [e,c,h]=await Promise.all([sb.from('empresas').select('id,data'),sb.from('config').select('id,data'),sb.from('historico').select('empresa,texto,em').order('em',{ascending:false}).limit(30)]);
+  if(e.error){$('#sync').textContent='Erro ao carregar: '+e.error.message;return;}
+  EMP=e.data.map(r=>Object.assign({id:r.id},r.data));const l=(c.data||[]).find(r=>r.id==='links');LINKS=Object.assign({},LINKS0,(l&&l.data.links)||{});HIST=h.data||[];
+  dbOk=true;$('#sync').textContent=EMP.length+' empresas · salvo na nuvem';render();}
+let rt;function aoVivo(){if(rt)return;rt=sb.channel('mud').on('postgres_changes',{event:'*',schema:'public',table:'empresas'},p=>{const r=p.new&&p.new.id?p.new:null;if(p.eventType==='DELETE'){EMP=EMP.filter(e=>e.id!==p.old.id);}else if(r){const i=EMP.findIndex(e=>e.id===r.id);const o=Object.assign({id:r.id},r.data);if(i>=0)EMP[i]=o;else EMP.push(o);}render();}).subscribe();}
+function telaLogin(on){$('#login').hidden=!on;document.querySelector('main').hidden=on;$('#tabs').hidden=on;}
+$('#lgForm').onsubmit=async ev=>{ev.preventDefault();$('#lgMsg').textContent='Entrando…';const {error}=await sb.auth.signInWithPassword({email:$('#lgEmail').value.trim(),password:$('#lgPass').value});$('#lgMsg').textContent=error?'E-mail ou senha incorretos.':'';};
+$('#sair').onclick=()=>sb.auth.signOut();
+sb.auth.onAuthStateChange((ev,ses)=>{if(ses){telaLogin(false);$('#sair').hidden=false;if(!dbOk){carregar();aoVivo();}}else{telaLogin(true);$('#sair').hidden=true;dbOk=false;EMP=[];}});
+if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
+</script>
+
+</body></html>
