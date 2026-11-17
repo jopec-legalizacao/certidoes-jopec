@@ -142,7 +142,7 @@ dialog .df{padding:12px 16px;border-top:1px solid var(--line);display:flex;gap:8
       <button role="tab" data-v="painel" aria-selected="true">Painel</button>
       <button role="tab" data-v="empresas" aria-selected="false">Empresas</button>
       <button role="tab" data-v="lancar" aria-selected="false">Lançar certidões</button>
-      <button role="tab" data-v="perguntar" aria-selected="false">Perguntar à IA</button>
+      <button role="tab" data-v="perguntar" aria-selected="false" hidden>Perguntar à IA</button>
       <button role="tab" data-v="dados" aria-selected="false">Importar e backup</button>
     </nav>
   </div>
@@ -182,8 +182,8 @@ dialog .df{padding:12px 16px;border-top:1px solid var(--line);display:flex;gap:8
 
   <!-- LANÇAR -->
   <section class="view" id="v-lancar" hidden>
-    <div class="split">
-      <div class="panel">
+    <div class="split" style="grid-template-columns:minmax(0,640px)">
+      <div class="panel" hidden>
         <h2>Lançar com a IA</h2>
         <p class="muted small" style="margin:0">Escreva do seu jeito ou anexe as certidões em PDF. A IA identifica a empresa, o tipo, a emissão e a validade, e você confere antes de salvar.</p>
         <textarea id="lText" placeholder="Ex.: CND da RFB da Vostok emitida hoje. PGM da Allegra pedida, protocolo 5106120200, pronta em 01/12/2026. ISS da Pakhet saiu só protocolo."></textarea>
