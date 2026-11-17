@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#0c2a24"><link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon-192.png"><link rel="apple-touch-icon" href="icon-192.png">
+<meta name="theme-color" content="#a23133"><link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon-192.png"><link rel="apple-touch-icon" href="icon-192.png">
 <meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Certidões">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px system-ui}[hidden]{display:none!important}img{max-width:100%}</style>
@@ -10,26 +10,26 @@
 <style>
 /* Layout: barra fixa no topo com abas; conteúdo em coluna única de até 1180px; tabelas largas rolam dentro do próprio contêiner */
 :root{
-  --bg:#f3f5f4; --surface:#ffffff; --surface2:#e9eeec; --ink:#14201d; --muted:#5a6a65; --line:#d3dcd8;
-  --accent:#0f5c4d; --accent-ink:#ffffff; --stamp:#9b2c1f;
+  --bg:#f5f4f4; --surface:#ffffff; --surface2:#efeded; --ink:#231a1b; --muted:#6b6162; --line:#dfd8d8;
+  --accent:#a23133; --accent-ink:#ffffff; --stamp:#a23133;
   --ok:#1f7a4a; --ok-bg:#dff1e6; --warn:#a15c00; --warn-bg:#fdecc8; --bad:#b3261e; --bad-bg:#fbdcd8;
   --info:#1d5fa8; --info-bg:#dbe8f8; --pend:#8a4b00; --pend-bg:#f6e0c7; --none:#7d8a86; --none-bg:#eceff0;
   --f-display:"Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
   --f-body:"Instrument Sans", "Segoe UI", system-ui, sans-serif;
   --f-mono:"JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
-  --band:#0c2a24; --band-ink:#e8f2ee; --band-muted:#9cc0b5; --paper:#fbfcfb;
+  --band:#a23133; --band-ink:#ffffff; --band-muted:#f2cfd0; --brand-grey:#bdbec0; --paper:#fbfcfb;
   --r:12px;
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
-  --bg:#0f1514; --surface:#17201e; --surface2:#1f2a27; --ink:#e4ece9; --muted:#9aaba5; --line:#2c3a36;
-  --accent:#4fbf9f; --accent-ink:#06211b; --stamp:#f08a7c;
+  --bg:#151112; --surface:#1e1819; --surface2:#2a2223; --ink:#efe8e8; --muted:#ab9fa0; --line:#3a2f30;
+  --accent:#e4797d; --accent-ink:#2a0a0b; --stamp:#e4797d;
   --ok:#6fd39b; --ok-bg:#163527; --warn:#f2b54f; --warn-bg:#3a2c10; --bad:#ff8a80; --bad-bg:#3d1916;
-  --info:#8ab8f0; --info-bg:#172a42; --pend:#f0b27a; --pend-bg:#3a2614; --none:#8a9894; --none-bg:#222c2a; --band:#0a1916; --band-ink:#e4ece9; --band-muted:#86a89e; --paper:#17201e; color-scheme:dark}}
+  --info:#8ab8f0; --info-bg:#172a42; --pend:#f0b27a; --pend-bg:#3a2614; --none:#8a9894; --none-bg:#222c2a; --band:#6e1f23; --band-ink:#ffffff; --band-muted:#e3b5b7; --paper:#17201e; color-scheme:dark}}
 :root[data-theme="dark"]{
-  --bg:#0f1514; --surface:#17201e; --surface2:#1f2a27; --ink:#e4ece9; --muted:#9aaba5; --line:#2c3a36;
-  --accent:#4fbf9f; --accent-ink:#06211b; --stamp:#f08a7c;
+  --bg:#151112; --surface:#1e1819; --surface2:#2a2223; --ink:#efe8e8; --muted:#ab9fa0; --line:#3a2f30;
+  --accent:#e4797d; --accent-ink:#2a0a0b; --stamp:#e4797d;
   --ok:#6fd39b; --ok-bg:#163527; --warn:#f2b54f; --warn-bg:#3a2c10; --bad:#ff8a80; --bad-bg:#3d1916;
-  --info:#8ab8f0; --info-bg:#172a42; --pend:#f0b27a; --pend-bg:#3a2614; --none:#8a9894; --none-bg:#222c2a; --band:#0a1916; --band-ink:#e4ece9; --band-muted:#86a89e; --paper:#17201e; color-scheme:dark}
+  --info:#8ab8f0; --info-bg:#172a42; --pend:#f0b27a; --pend-bg:#3a2614; --none:#8a9894; --none-bg:#222c2a; --band:#6e1f23; --band-ink:#ffffff; --band-muted:#e3b5b7; --paper:#17201e; color-scheme:dark}
 *{box-sizing:border-box}
 body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.45}
 body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--band)}
@@ -37,14 +37,16 @@ header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background
 .wrap{max-width:1180px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
 .topbar{display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding-block:12px 0}
 .brand{display:flex;align-items:center;gap:12px;margin-right:auto}
-.brand canvas{width:40px;height:40px;flex:none}
+.brand .mark{height:40px;width:auto;flex:none}
+.brand .word{height:34px;width:auto;display:block}
+@media (max-width:520px){.brand .word{height:26px}}
 .brand small{display:block;font-size:12px;color:var(--band-muted);font-weight:500}
 .brand h1{font-family:var(--f-display);font-size:22px;margin:0;letter-spacing:-.01em}
 .sync{font-size:12px;color:var(--band-muted);border:1px solid color-mix(in srgb,var(--band-muted) 40%,transparent);border-radius:999px;padding:4px 10px}
 nav.tabs{display:flex;gap:2px;overflow-x:auto;margin-top:8px}
 nav.tabs button{font:600 14px var(--f-body);background:none;border:0;border-bottom:3px solid transparent;color:var(--band-muted);padding:10px 14px;cursor:pointer;white-space:nowrap}
 nav.tabs button:hover{color:var(--band-ink)}
-nav.tabs button[aria-selected="true"]{color:var(--band-ink);border-bottom-color:#5fd0ae}
+nav.tabs button[aria-selected="true"]{color:var(--band-ink);border-bottom-color:#ffffff}
 nav.tabs button:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 main{padding-block:20px 60px}
 section.view{display:flex;flex-direction:column;gap:18px}
@@ -135,7 +137,7 @@ dialog .df{padding:12px 16px;border-top:1px solid var(--line);display:flex;gap:8
 <header class="top">
   <div class="wrap">
     <div class="topbar">
-      <div class="brand"><canvas id="logo" width="80" height="80" aria-hidden="true"></canvas><div><h1>Certidões Jopec</h1><small>Departamento de Legalização · controle de CNDs</small></div></div>
+      <div class="brand"><img class="mark" src="logo-mark.png" alt=""><div><img class="word" src="logo-jopec.png" alt="Jopec Assessoria Contábil"><h1 style="font-size:15px;margin-top:4px">Certidões · Departamento de Legalização</h1></div></div>
       <span class="sync" id="sync">Conectando…</span><button class="btn" id="sair" hidden style="background:transparent;color:var(--band-ink);border-color:var(--band-muted)">Sair</button>
     </div>
     <nav class="tabs" role="tablist" id="tabs">
@@ -367,7 +369,7 @@ function desenhar(){
 $('#tgrid').onclick=e=>{const b=e.target.closest('.tcard');if(!b)return;st.tipo=st.tipo===b.dataset.t?null:b.dataset.t;renderPainel();document.querySelector('#fila').scrollIntoView({behavior:'smooth',block:'nearest'});};
 let rz;addEventListener('resize',()=>{clearTimeout(rz);rz=setTimeout(desenhar,120);});
 matchMedia('(prefers-color-scheme: dark)').addEventListener('change',()=>{desenhar();logo();});
-function logo(){const c=$('#logo');const x=c.getContext('2d');x.clearRect(0,0,80,80);const g='#5fd0ae';x.strokeStyle=g;x.fillStyle=g;x.lineWidth=3;x.beginPath();x.arc(40,40,34,0,Math.PI*2);x.stroke();x.lineWidth=1.5;x.beginPath();x.arc(40,40,27,0,Math.PI*2);x.stroke();
+function logo(){return;const c=$('#logo');const x=c.getContext('2d');x.clearRect(0,0,80,80);const g='#5fd0ae';x.strokeStyle=g;x.fillStyle=g;x.lineWidth=3;x.beginPath();x.arc(40,40,34,0,Math.PI*2);x.stroke();x.lineWidth=1.5;x.beginPath();x.arc(40,40,27,0,Math.PI*2);x.stroke();
   for(let i=0;i<24;i++){const a=i/24*Math.PI*2;x.beginPath();x.moveTo(40+Math.cos(a)*29,40+Math.sin(a)*29);x.lineTo(40+Math.cos(a)*32,40+Math.sin(a)*32);x.stroke();}
   x.lineWidth=5;x.lineCap='round';x.lineJoin='round';x.beginPath();x.moveTo(28,41);x.lineTo(37,50);x.lineTo(54,31);x.stroke();}
 logo();
