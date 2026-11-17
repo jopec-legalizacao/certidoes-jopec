@@ -1,0 +1,18 @@
+create table if not exists public.empresas (id text primary key, data jsonb not null, updated_at timestamptz not null default now());
+create table if not exists public.historico (id bigint generated always as identity primary key, empresa text, texto text, em timestamptz not null default now(), autor uuid default auth.uid());
+create table if not exists public.config (id text primary key, data jsonb not null);
+alter table public.empresas enable row level security;
+alter table public.historico enable row level security;
+alter table public.config enable row level security;
+create policy "equipe le empresas" on public.empresas for select to authenticated using (true);
+create policy "equipe grava empresas" on public.empresas for insert to authenticated with check (true);
+create policy "equipe altera empresas" on public.empresas for update to authenticated using (true) with check (true);
+create policy "equipe le historico" on public.historico for select to authenticated using (true);
+create policy "equipe grava historico" on public.historico for insert to authenticated with check (true);
+create policy "equipe le config" on public.config for select to authenticated using (true);
+create policy "equipe grava config" on public.config for insert to authenticated with check (true);
+create policy "equipe altera config" on public.config for update to authenticated using (true) with check (true);
+create or replace function public.toca_updated_at() returns trigger language plpgsql set search_path = '' as $$ begin new.updated_at = now(); return new; end $$;
+create trigger empresas_updated before update on public.empresas for each row execute function public.toca_updated_at();
+create index if not exists historico_em_idx on public.historico (em desc);
+alter publication supabase_realtime add table public.empresas;
