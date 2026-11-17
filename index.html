@@ -184,7 +184,13 @@ dialog .df{padding:12px 16px;border-top:1px solid var(--line);display:flex;gap:8
 
   <!-- LANÇAR -->
   <section class="view" id="v-lancar" hidden>
-    <div class="split" style="grid-template-columns:minmax(0,640px)">
+    <div class="split">
+      <div class="panel">
+        <h2>Anexar certidões</h2>
+        <p class="muted small" style="margin:0">Emitiu a certidão no site? Arraste o PDF aqui. O sistema lê o CNPJ, descobre a empresa e o tipo de certidão, pega a emissão e a validade, e você confere antes de salvar. Pode mandar vários de uma vez.</p>
+        <div class="drop" id="cDrop">Arraste os PDFs aqui ou <button class="link" id="cPick">escolha os arquivos</button><input type="file" id="cFiles" multiple accept="application/pdf" hidden></div>
+        <span class="small muted" id="cMsg"></span>
+      </div>
       <div class="panel" hidden>
         <h2>Lançar com a IA</h2>
         <p class="muted small" style="margin:0">Escreva do seu jeito ou anexe as certidões em PDF. A IA identifica a empresa, o tipo, a emissão e a validade, e você confere antes de salvar.</p>
@@ -229,7 +235,7 @@ dialog .df{padding:12px 16px;border-top:1px solid var(--line);display:flex;gap:8
   <!-- DADOS -->
   <section class="view" id="v-dados" hidden>
     <div class="split">
-      <div class="panel">
+      <div class="panel" hidden>
         <h2>Importar a planilha</h2>
         <p class="muted small" style="margin:0">No Google Planilhas, abra “FluxoPro — Controle e Backup”, vá em Arquivo › Fazer download › Microsoft Excel (.xlsx) e escolha o arquivo aqui. As abas de empresa e o CADASTRO CLIENTES são lidos; o painel e os alertas são ignorados.</p>
         <input type="file" id="xFile" accept=".xlsx,.xls">
@@ -384,7 +390,7 @@ function renderGrid(){
   const q=st.busca;const L=ativos().filter(e=>!q||[e.nome,e.razao,e.cnpj,e.im].join(' ').toLowerCase().includes(q));
   if(!dbOk){$('#grid').innerHTML='<tr><td colspan="15" class="empty">Carregando…</td></tr>';return;}
   if(!L.length){$('#grid').innerHTML='<tr><td colspan="15" class="empty">'+(EMP.length?'Nenhuma empresa encontrada.':'Nenhuma empresa cadastrada. Importe a planilha ou clique em Nova empresa.')+'</td></tr>';return;}
-  $('#grid').innerHTML=L.map(e=>'<tr><td class="name"><button data-emp="'+esc(e.id)+'">'+esc(e.nome)+'</button>'+(e.ativo===false?' <span class="pill s-sem">arquivada</span>':'')+'</td>'+TIPOS.map(t=>{const i=info(e,t.k);const lab=i.est==='subst'?'→EST':i.val?(i.n<0?'venc':i.n+'d'):(i.est==='sem'?'—':(i.est==='pend'?'pend':'and'));return '<td class="c"><button class="cell s-'+i.est+'" data-e="'+esc(e.id)+'" data-t="'+t.k+'" title="'+esc(t.n+' · '+(i.val?'válida até '+br(i.val):EST[i.est])+(i.c.status?' · '+i.c.status:''))+'">'+lab+(i.manual?'*':'')+'</button></td>';}).join('')+'</tr>').join('');
+  $('#grid').innerHTML=L.map(e=>'<tr><td class="name"><button data-emp="'+esc(e.id)+'">'+esc(e.nome)+'</button>'+(e.simples===true?' <span class="pill s-and" title="Simples Nacional">SN</span>':'')+(e.ativo===false?' <span class="pill s-sem">arquivada</span>':'')+'</td>'+TIPOS.map(t=>{const i=info(e,t.k);const lab=i.est==='subst'?'→EST':i.val?(i.n<0?'venc':i.n+'d'):(i.est==='sem'?'—':(i.est==='pend'?'pend':'and'));return '<td class="c"><button class="cell s-'+i.est+'" data-e="'+esc(e.id)+'" data-t="'+t.k+'" title="'+esc(t.n+' · '+(i.val?'válida até '+br(i.val):EST[i.est])+(i.c.status?' · '+i.c.status:''))+'">'+lab+(i.manual?'*':'')+'</button></td>';}).join('')+'</tr>').join('');
 }
 $('#busca').oninput=e=>{st.busca=e.target.value.toLowerCase().trim();renderGrid();};
 $('#verArq').onchange=e=>{st.arq=e.target.checked;render();};
@@ -422,7 +428,7 @@ function editCert(id,k){
 
 function abrirEmpresa(id){
   const e=emp(id);if(!e)return;
-  const kv=[['Razão social',e.razao],['CNPJ',e.cnpj],['Inscrição municipal',e.im],['Inscrição estadual',e.ie],['Natureza / registro',e.natureza],['Endereço',[e.endereco,e.bairro,e.cidade,e.uf,e.cep].filter(Boolean).join(', ')],['Telefone',e.tel],['E-mail',e.email],['Observações',e.obs]];
+  const kv=[['Razão social',e.razao],['CNPJ',e.cnpj],['Inscrição municipal',e.im],['Inscrição estadual',e.ie],['Natureza / registro',e.natureza],['Simples Nacional',e.simples===true?'Sim':e.simples===false?'Não':''],['Nome fantasia',e.fantasia],['Endereço',[e.endereco,e.bairro,e.cidade,e.uf,e.cep].filter(Boolean).join(', ')],['Telefone',e.tel],['E-mail',e.email],['Observações',e.obs]];
   abrir(e.nome,'<div class="kv">'+kv.map(([k,v])=>'<div><span>'+k+'</span>'+(v?esc(v):'<span class="muted" style="text-transform:none;letter-spacing:0">—</span>')+'</div>').join('')+'</div>'+
    '<div class="scroll"><table><thead><tr><th>Certidão</th><th>Emissão</th><th>Validade</th><th>Situação</th></tr></thead><tbody>'+TIPOS.map(t=>{const i=info(e,t.k);return '<tr data-t="'+t.k+'" style="cursor:pointer"><td>'+esc(t.n)+'</td><td class="mono">'+br(i.c.emissao)+'</td><td class="mono">'+br(i.val)+(i.manual?' *':'')+'</td><td>'+pill(i.est,i.c.status||EST[i.est])+'</td></tr>';}).join('')+'</tbody></table></div>',
    '<button class="btn danger" id="eArq">'+(e.ativo===false?'Reativar':'Arquivar (não é mais cliente)')+'</button><button class="btn pri" id="eEd">Editar cadastro</button>');
@@ -430,11 +436,25 @@ function abrirEmpresa(id){
   $('#eEd').onclick=()=>formEmpresa(e);
   $('#eArq').onclick=async()=>{await salvarEmp(e.id,{ativo:e.ativo===false},e.ativo===false?'empresa reativada':'empresa arquivada');dlg.close();};
 }
-const CAMPOS=[['nome','Nome curto'],['razao','Razão social'],['cnpj','CNPJ'],['im','Inscrição municipal'],['ie','Inscrição estadual'],['natureza','Natureza / registro (JUCERJA ou RCPJ)'],['cep','CEP'],['endereco','Endereço'],['bairro','Bairro'],['cidade','Cidade'],['uf','UF'],['tel','Telefone'],['email','E-mail'],['obs','Observações']];
+const CAMPOS=[['nome','Nome curto'],['razao','Razão social'],['fantasia','Nome fantasia'],['cnpj','CNPJ'],['im','Inscrição municipal'],['ie','Inscrição estadual'],['natureza','Natureza / registro (JUCERJA ou RCPJ)'],['cep','CEP'],['endereco','Endereço'],['bairro','Bairro'],['cidade','Cidade'],['uf','UF'],['tel','Telefone'],['email','E-mail'],['obs','Observações']];
 function formEmpresa(e){
   const n=!e;e=e||{};
-  abrir(n?'Nova empresa':'Editar '+e.nome,'<div class="formgrid">'+CAMPOS.map(([k,l])=>'<label class="f">'+l+'<input id="c_'+k+'" value="'+esc(e[k]||'')+'"></label>').join('')+'</div>','<button class="btn pri" id="cOk">Salvar</button>');
-  $('#cOk').onclick=async()=>{const d={};CAMPOS.forEach(([k])=>d[k]=$('#c_'+k).value.trim());if(!d.nome)return toast('Informe o nome da empresa.');
+  const sn=e.simples===true?'sim':e.simples===false?'nao':'';
+  abrir(n?'Nova empresa':'Editar '+e.nome,'<div class="drop" id="eDrop">Arraste aqui o <b>cartão CNPJ</b>, o comprovante de <b>inscrição municipal</b> e o de <b>inscrição estadual</b> (PDF) que o formulário se preenche sozinho, ou <button class="link" id="ePick">escolha os arquivos</button><input type="file" id="eFiles" multiple accept="application/pdf" hidden></div><span class="small muted" id="eMsg"></span>'+
+   '<div class="row"><span class="small muted">Simples Nacional:</span><div class="chips" id="snBox">'+[['sim','Sim'],['nao','Não'],['','Não informado']].map(([v,l])=>'<button type="button" class="chip" data-sn="'+v+'" aria-pressed="'+(sn===v)+'">'+l+'</button>').join('')+'</div></div>'+
+   '<div class="formgrid">'+CAMPOS.map(([k,l])=>'<label class="f">'+l+'<input id="c_'+k+'" value="'+esc(e[k]||'')+'"></label>').join('')+'</div>','<button class="btn pri" id="cOk">Salvar</button>');
+  let snv=sn;$('#snBox').onclick=ev=>{const b=ev.target.closest('[data-sn]');if(!b)return;snv=b.dataset.sn;$('#snBox').querySelectorAll('.chip').forEach(c=>c.setAttribute('aria-pressed',c===b));};
+  const preencher=async files=>{$('#eMsg').textContent='Lendo…';const lidos=[];
+    for(const f of files){try{const r=lerCadastro(await pdfItems(f));if(!r.docs.length){lidos.push(f.name+': não reconheci o documento');continue;}
+      [['razao','razao'],['fantasia','fantasia'],['cnpj','cnpj'],['im','im'],['ie','ie'],['natureza','natureza'],['cep','cep'],['endereco','endereco'],['bairro','bairro'],['cidade','cidade'],['uf','uf'],['tel','tel'],['email','email']].forEach(([a,b])=>{if(r[a]&&$('#c_'+b))$('#c_'+b).value=r[a];});
+      if(r.situacaoIM&&!/ATIV/.test(r.situacaoIM)){const o=$('#c_obs');o.value=(o.value?o.value+' | ':'')+'Inscrição municipal: '+r.situacaoIM;}
+      if(!$('#c_nome').value&&(r.fantasia||r.razao))$('#c_nome').value=(r.fantasia||r.razao).replace(/\s+(LTDA|EIRELI|ME|EPP|S\/?A)\.?$/i,'');
+      lidos.push(f.name+': '+r.docs.join(', '));}catch(err){lidos.push(f.name+': não consegui ler');}}
+    $('#eMsg').textContent=lidos.join(' · ')+'. Confira os campos antes de salvar.';};
+  $('#ePick').onclick=()=>$('#eFiles').click();$('#eFiles').onchange=ev=>{preencher([...ev.target.files]);ev.target.value='';};
+  const ed=$('#eDrop');ed.ondragover=ev=>{ev.preventDefault();ed.classList.add('over');};ed.ondragleave=()=>ed.classList.remove('over');ed.ondrop=ev=>{ev.preventDefault();ed.classList.remove('over');preencher([...ev.dataTransfer.files].filter(f=>/pdf/.test(f.type)));};
+  $('#cOk').onclick=async()=>{const d={};CAMPOS.forEach(([k])=>d[k]=$('#c_'+k).value.trim());if(!d.nome)return toast('Informe o nome da empresa.');d.simples=snv==='sim'?true:snv==='nao'?false:null;d.cnpj=d.cnpj.replace(/\D/g,'');d.im=d.im.replace(/\D/g,'');d.ie=d.ie.replace(/\D/g,'');
+    if(n&&d.cnpj&&EMP.some(x=>String(x.cnpj||'').replace(/\D/g,'')===d.cnpj))return toast('Já existe uma empresa com esse CNPJ.');
     d.prazos=Object.assign({},e.prazos||{});delete d.prazos.SEFAZ;
     if(n){const id=slug(d.nome);if(emp(id))return toast('Já existe uma empresa com esse nome.');d.certs={};d.ativo=true;await gravar(id,d,'empresa cadastrada',d.nome);}
     else await salvarEmp(e.id,d,'cadastro atualizado');dlg.close();};
@@ -513,9 +533,9 @@ $('#lGo').onclick=async()=>{
   finally{btn.disabled=false;$('#lStop').hidden=true;}
 };
 function renderRev(duv){
-  $('#revBox').hidden=!REV.length;$('#revNotes').hidden=!duv.length;$('#revNotes').textContent=duv.length?'Dúvidas da IA: '+duv.join(' · '):'';
+  $('#revBox').hidden=!REV.length;$('#revNotes').hidden=!duv.length;$('#revNotes').textContent=duv.length?'Atenção: '+duv.join(' · '):'';
   const opE='<option value="">— escolha —</option>'+ativos().filter(e=>e.ativo!==false).map(e=>'<option value="'+esc(e.id)+'">'+esc(e.nome)+'</option>').join('');
-  $('#rev').innerHTML=REV.map((r,i)=>'<tr data-i="'+i+'"><td><input type="checkbox" data-f="ok" '+(r.ok?'checked':'')+' aria-label="Incluir"></td><td><select data-f="id">'+opE+'</select>'+(r.id?'':'<div class="small" style="color:var(--bad)">Lido: '+esc(r.nomeLido)+'</div>')+'</td><td><select data-f="tipo">'+TIPOS.map(t=>'<option value="'+t.k+'">'+t.a+'</option>').join('')+'</select></td><td><input type="date" data-f="emissao" value="'+esc(r.emissao)+'"></td><td><input type="date" data-f="validade" value="'+esc(r.validade)+'"></td><td><input data-f="status" value="'+esc(r.status)+'"></td><td><input data-f="obs" value="'+esc(r.obs)+'"></td></tr>').join('');
+  $('#rev').innerHTML=REV.map((r,i)=>'<tr data-i="'+i+'"><td><input type="checkbox" data-f="ok" '+(r.ok?'checked':'')+' aria-label="Incluir"></td><td><select data-f="id">'+opE+'</select>'+'<div class="small muted">'+esc(r.nomeLido)+'</div>'+'</td><td><select data-f="tipo">'+TIPOS.map(t=>'<option value="'+t.k+'">'+t.a+'</option>').join('')+'</select></td><td><input type="date" data-f="emissao" value="'+esc(r.emissao)+'"></td><td><input type="date" data-f="validade" value="'+esc(r.validade)+'"></td><td><input data-f="status" value="'+esc(r.status)+'"></td><td><input data-f="obs" value="'+esc(r.obs)+'"></td></tr>').join('');
   [...$('#rev').rows].forEach((tr,i)=>{tr.querySelector('[data-f=id]').value=REV[i].id;tr.querySelector('[data-f=tipo]').value=REV[i].tipo;});
 }
 $('#rev').oninput=e=>{const tr=e.target.closest('tr');const f=e.target.dataset.f;REV[+tr.dataset.i][f]=e.target.type==='checkbox'?e.target.checked:e.target.value;};
@@ -529,6 +549,115 @@ $('#revSave').onclick=async()=>{
     if(await salvarCert(r.id,r.tipo,{emissao:r.emissao||(r.emissao===''&&!val?old.emissao||null:null),validade:val,status:r.status,obs:r.obs||old.obs||''},true))n++;}
   $('#revSave').disabled=false;REV=[];$('#revBox').hidden=true;$('#lText').value='';FILES=[];showFiles();render();toast(n+' lançamento(s) salvos.');
 };
+
+/* ---------- leitura inteligente de PDFs (sem IA) ---------- */
+function _norm(s){return String(s||'').replace(/[–—]/g,'-').replace(/\s+/g,' ').trim();}
+function _sem(s){return _norm(s).normalize('NFD').replace(/[̀-ͯ]/g,'').toUpperCase();}
+function _linhas(items){const L=[];[...items].sort((a,b)=>b.y-a.y||a.x-b.x).forEach(i=>{const l=L.find(l=>Math.abs(l.y-i.y)<=2);if(l)l.it.push(i);else L.push({y:i.y,it:[i]});});L.forEach(l=>l.it.sort((a,b)=>a.x-b.x));return L;}
+function _texto(items){return _linhas(items).map(l=>l.it.map(i=>i.str).join(' ')).join('\n');}
+function _valor(items,re){
+  const lab=items.find(i=>re.test(_sem(i.str)));if(!lab)return '';
+  const dir=items.filter(i=>i!==lab&&Math.abs(i.y-lab.y)<=3&&i.x>lab.x).sort((a,b)=>a.x-b.x)[0];
+  const abaixo=items.filter(i=>Math.abs(i.x-lab.x)<=4&&i.y<lab.y&&lab.y-i.y<=14).sort((a,b)=>b.y-a.y)[0];
+  const v=/:\s*$/.test(lab.str)&&dir?dir:(abaixo||dir);return v?_norm(v.str):'';
+}
+const _CNPJ=/\d{2}\.?\d{3}\.?\d{3}\/?\d{4}-?\d{2}/g;
+function _dig(s){return String(s||'').replace(/\D/g,'');}
+const _MESES={JANEIRO:1,FEVEREIRO:2,MARCO:3,ABRIL:4,MAIO:5,JUNHO:6,JULHO:7,AGOSTO:8,SETEMBRO:9,OUTUBRO:10,NOVEMBRO:11,DEZEMBRO:12};
+function _iso(d,m,a){return a+'-'+String(m).padStart(2,'0')+'-'+String(d).padStart(2,'0');}
+function _dataBR(s){const m=/(\d{2})\/(\d{2})\/(\d{4})/.exec(s||'');return m?_iso(m[1],m[2],m[3]):null;}
+
+/* Cartão CNPJ, comprovante de inscrição municipal/estadual, alvará */
+function lerCadastro(items){
+  const T=_sem(_texto(items));const out={docs:[]};
+  if(/CADASTRO NACIONAL DA PESSOA JURIDICA/.test(T)){
+    out.docs.push('Cartão CNPJ');
+    out.cnpj=_dig(_valor(items,/^NUMERO DE INSCRICAO$/));
+    out.razao=_valor(items,/^NOME EMPRESARIAL$/);
+    const f=_valor(items,/NOME DE FANTASIA/);if(f&&!/^\*+$/.test(f))out.fantasia=f;
+    const nj=_valor(items,/NATUREZA JURIDICA$/);if(nj){out.natureza=nj+(/^206-2/.test(nj)?' – JUCERJA':/^224-0/.test(nj)?' – RCPJ':'');}
+    const lg=_valor(items,/^LOGRADOURO$/),nu=_valor(items,/^NUMERO$/),cp=_valor(items,/^COMPLEMENTO$/);
+    out.endereco=[lg,nu&&nu.replace(/^0+(?=\d)/,''),cp&&!/^\*+$/.test(cp)?cp:''].filter(Boolean).join(', ');
+    out.cep=_dig(_valor(items,/^CEP$/));out.bairro=_valor(items,/^BAIRRO/);out.cidade=_valor(items,/^MUNICIPIO$/);out.uf=_valor(items,/^UF$/);
+    const em=_valor(items,/^ENDERECO ELETRONICO$/);if(em&&!/^\*+$/.test(em))out.email=em;
+    const tel=_valor(items,/^TELEFONE$/);if(tel&&!/^\*+$/.test(tel))out.tel=tel;
+    out.situacao=_valor(items,/^SITUACAO CADASTRAL$/);
+  }
+  if(/INSCRICAO MUNICIPAL/.test(T)){
+    out.docs.push('Inscrição municipal');
+    let im=_valor(items,/INSCRICAO MUNICIPAL/);out.im=_dig(im);
+    if(!out.cnpj){const c=(_texto(items).match(_CNPJ)||[])[0]||_valor(items,/CNPJ/);out.cnpj=_dig(c);}
+    if(!out.razao){const r=_valor(items,/NOME (OU NOME )?EMPRESARIAL|NOME DA EMPRESA/);if(r)out.razao=r;}
+    const cid=/PREFEITURA (DA CIDADE DO|MUNICIPAL DE|DE) ([A-Z ]+?)(\n| CONCEDE| SECRETARIA|$)/.exec(T);if(cid&&!out.cidade)out.cidade=cid[2].trim();
+    const sit=_valor(items,/^SITUACAO CADASTRAL:?$/);if(sit)out.situacaoIM=sit;
+  }
+  if(/INSCRICAO ESTADUAL|CAD-?ICMS/.test(T)){
+    out.docs.push('Inscrição estadual');
+    let ie=_valor(items,/INSCRICAO ESTADUAL/);if(!_dig(ie)){const m=/INSCRICAO ESTADUAL[^0-9]{0,30}([\d.\-\/]{6,})/.exec(T);ie=m?m[1]:'';}out.ie=_dig(ie);
+    if(!out.cnpj){const c=(_texto(items).match(_CNPJ)||[])[0];out.cnpj=_dig(c);}
+  }
+  return out;
+}
+
+/* Certidões */
+const _TIPOS_DOC=[
+ ['ISS',/IMPOSTO SOBRE SERVICOS|CERTIDAO .{0,40}\bISS\b/],
+ ['TRAB',/DEBITOS TRABALHISTAS|\bCNDT\b/],
+ ['FGTS',/\bFGTS\b|CERTIFICADO DE REGULARIDADE DO FGTS/],
+ ['EST',/CERTIDAO CONJUNTA DE REGULARIDADE FISCAL|(SECRETARIA DE ESTADO DE FAZENDA|SEFAZ).{0,200}(PROCURADORIA GERAL DO ESTADO|PGE)/],
+ ['PGM',/PROCURADORIA GERAL DO MUNICIPIO|DIVIDA ATIVA (DO|MUNICIPAL)/],
+ ['RFB',/TRIBUTOS FEDERAIS|DIVIDA ATIVA DA UNIAO|RECEITA FEDERAL/],
+ ['FAL',/FALENCIA|CONCORDATA|RECUPERACAO JUDICIAL/],
+ ['CIV',/ACOES CIVEIS|DISTRIBUICAO CIVEL|\bCIVEL\b|\bCIVEIS\b/],
+ ['PROT',/PROTESTO/],
+ ['CORREG',/CORREGEDORIA/],
+ ['SICAF',/\bSICAF\b/]
+];
+function lerCertidao(items){
+  const raw=_texto(items),T=_sem(raw),uma=T.replace(/\n/g,' ');
+  let tipo=null;if(/CERTIDAO|CERTIFICADO|CERTIFICA/.test(uma))for(const [k,re] of _TIPOS_DOC){if(re.test(uma)){tipo=k;break;}}
+  const cnpjs=[...new Set((raw.replace(/[–—]/g,'-').match(_CNPJ)||[]).map(_dig))];
+  let emissao=null,validade=null;
+  let m=/VALIDADE:?\s*(\d{2}\/\d{2}\/\d{4})\s*A\s*(\d{2}\/\d{2}\/\d{4})/.exec(uma);
+  if(m){emissao=_dataBR(m[1]);validade=_dataBR(m[2]);}
+  if(!validade){m=/(VALIDA ATE|VALIDADE( ATE)?|VALIDO ATE|PRAZO DE VALIDADE[^0-9]{0,20})\s*:?\s*(\d{2}\/\d{2}\/\d{4})/.exec(uma);if(m)validade=_dataBR(m[3]);}
+  if(!emissao){m=/(EMITIDA|EMITIDO|EMISSAO|EXPEDICAO|EXPEDIDA|LAVRADA)[^0-9]{0,45}(\d{2}\/\d{2}\/\d{4})/.exec(uma);if(m)emissao=_dataBR(m[2]);}
+  if(!emissao){m=/\bEM (\d{2}\/\d{2}\/\d{4})/.exec(uma);if(m)emissao=_dataBR(m[1]);}
+  if(!emissao){m=/,\s*(\d{1,2}) DE ([A-Z]+) DE (\d{4})/.exec(uma);if(m&&_MESES[m[2]])emissao=_iso(m[1],_MESES[m[2]],m[3]);}
+  let status='';
+  if(/POSITIVA COM EFEITOS? DE NEGATIVA/.test(uma))status='POSITIVA COM EFEITO DE NEGATIVA';
+  else if(/CERTIDAO POSITIVA|\bPOSITIVA\b/.test(uma))status='POSITIVA';
+  else if(/NEGATIVA|NADA CONSTA|NAO CONSTA/.test(uma))status='NEGATIVA';
+  else if(tipo==='FGTS'&&/REGULAR/.test(uma))status='REGULAR';
+  const obs=[];
+  const ctl=/(CODIGO DE CONTROLE( DA CERTIDAO)?|N[OºO.]* ?AUTENTICACAO|CONTROLE|CERTIFICACAO NUMERO|CERTIDAO N[OºO.]*)\s*:?\s*([A-Z0-9][A-Z0-9.\-]{5,})/.exec(uma);
+  if(ctl)obs.push(_norm(ctl[1].replace('N O','Nº'))+': '+ctl[3]);
+  return {tipo,cnpjs,emissao,validade,status,obs:obs.join(' | ')};
+}
+
+async function pdfItems(file){
+  await loadScript('https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js');
+  await loadScript('https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js');
+  const pdf=await window.pdfjsLib.getDocument({data:new Uint8Array(await file.arrayBuffer())}).promise;const it=[];
+  for(let p=1;p<=Math.min(pdf.numPages,3);p++){const pg=await pdf.getPage(p);const tc=await pg.getTextContent();tc.items.forEach(i=>{if(i.str&&i.str.trim())it.push({str:i.str,x:i.transform[4],y:i.transform[5]-(p-1)*2000});});}
+  return it;
+}
+function acharEmpresa(cnpjs){const L=EMP.filter(e=>e.ativo!==false);for(const c of cnpjs){const e=L.find(e=>String(e.cnpj||'').replace(/\D/g,'')===c);if(e)return e;}
+  for(const c of cnpjs){const b=c.slice(0,8);const e=L.find(e=>String(e.cnpj||'').replace(/\D/g,'').slice(0,8)===b);if(e)return e;}return null;}
+async function anexarCertidoes(files){
+  if(!files.length)return;$('#cMsg').textContent='Lendo '+files.length+' arquivo(s)…';const duv=[];REV=[];
+  for(const f of files){try{const r=lerCertidao(await pdfItems(f));const e=acharEmpresa(r.cnpjs);
+    if(!r.tipo)duv.push(f.name+': não identifiquei o tipo de certidão, escolha na tabela');
+    if(!e)duv.push(f.name+': CNPJ '+(r.cnpjs[0]||'não encontrado')+' não está cadastrado');
+    if(!r.emissao)duv.push(f.name+': não achei a data de emissão');
+    REV.push({ok:!!(e&&r.tipo),id:e?e.id:'',tipo:r.tipo||'RFB',emissao:r.emissao||'',validade:r.validade||'',status:r.status,obs:r.obs,nomeLido:f.name+(r.cnpjs[0]?' · CNPJ '+r.cnpjs[0]:'')});
+  }catch(err){duv.push(f.name+': não consegui ler o PDF');}}
+  renderRev(duv);$('#cMsg').textContent=REV.length?REV.length+' certidão(ões) lida(s). Confira abaixo e salve.':'Nada reconhecido.';
+  if(REV.length)$('#revBox').scrollIntoView({behavior:'smooth',block:'start'});
+}
+$('#cPick').onclick=()=>$('#cFiles').click();
+$('#cFiles').onchange=e=>{anexarCertidoes([...e.target.files]);e.target.value='';};
+{const d=$('#cDrop');d.ondragover=e=>{e.preventDefault();d.classList.add('over');};d.ondragleave=()=>d.classList.remove('over');d.ondrop=e=>{e.preventDefault();d.classList.remove('over');anexarCertidoes([...e.dataTransfer.files].filter(f=>/pdf/.test(f.type)));};}
 
 /* ---------- perguntar ---------- */
 const SUGS=['Quais certidões posso pedir hoje?','Quais PGM vencem nos próximos 30 dias?','Liste as pendências de ISS que precisam de agendamento','Resumo da situação de todas as empresas'];
