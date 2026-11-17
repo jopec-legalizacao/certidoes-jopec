@@ -6,7 +6,7 @@
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px system-ui}[hidden]{display:none!important}img{max-width:100%}</style>
 <title>Certidões Jopec</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap">
 <style>
 /* Layout: barra fixa no topo com abas; conteúdo em coluna única de até 1180px; tabelas largas rolam dentro do próprio contêiner */
 :root{
@@ -15,7 +15,7 @@
   --ok:#1f7a4a; --ok-bg:#dff1e6; --warn:#a15c00; --warn-bg:#fdecc8; --bad:#b3261e; --bad-bg:#fbdcd8;
   --info:#1d5fa8; --info-bg:#dbe8f8; --pend:#8a4b00; --pend-bg:#f6e0c7; --none:#7d8a86; --none-bg:#eceff0;
   --f-display:"Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
-  --f-body:"Instrument Sans", "Segoe UI", system-ui, sans-serif;
+  --f-body:"Plus Jakarta Sans", "Segoe UI", system-ui, sans-serif;
   --f-mono:"JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
   --band:#a23133; --band-ink:#ffffff; --band-muted:#f2cfd0; --brand-grey:#bdbec0; --paper:#fbfcfb;
   --r:12px;
@@ -130,6 +130,77 @@ dialog .df{padding:12px 16px;border-top:1px solid var(--line);display:flex;gap:8
 .files{display:flex;gap:6px;flex-wrap:wrap}
 .split{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:18px}
 @media (max-width:820px){.split{grid-template-columns:1fr}}
+
+/* ===== Refino visual v3: tipografia, linhas em degradê, profundidade ===== */
+:root{--row-a:color-mix(in srgb,var(--accent) 10%,var(--surface));--row-b:color-mix(in srgb,var(--brand-grey) 14%,var(--surface));--shadow:0 1px 2px rgb(60 20 22 / .06),0 6px 18px -10px rgb(60 20 22 / .22);--r:14px}
+:root[data-theme="dark"]{--row-a:color-mix(in srgb,var(--accent) 13%,var(--surface));--row-b:color-mix(in srgb,#ffffff 4%,var(--surface));--shadow:0 1px 2px rgb(0 0 0 / .4),0 8px 22px -12px rgb(0 0 0 / .7)}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--row-a:color-mix(in srgb,var(--accent) 13%,var(--surface));--row-b:color-mix(in srgb,#ffffff 4%,var(--surface));--shadow:0 1px 2px rgb(0 0 0 / .4),0 8px 22px -12px rgb(0 0 0 / .7)}}
+body{font-size:16px;line-height:1.5;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;font-feature-settings:"ss01","cv11"}
+header.top{background:linear-gradient(120deg,var(--band) 0%,color-mix(in srgb,var(--band) 72%,#000) 100%);box-shadow:0 4px 18px -8px rgb(0 0 0 / .45)}
+.brand h1{font-weight:600;letter-spacing:.01em;opacity:.92}
+nav.tabs button{font:600 15px var(--f-body);padding:12px 16px;letter-spacing:.005em}
+main{padding-block:26px 70px}
+section.view{gap:22px}
+h2{font-size:22px;font-weight:700;letter-spacing:-.015em}
+h3{font-family:var(--f-display);font-size:17px;font-weight:700}
+.small{font-size:13.5px}
+.panel,.ringbox,.kpi,.scroll{box-shadow:var(--shadow);border-color:color-mix(in srgb,var(--line) 70%,transparent)}
+.panel{padding:20px;gap:14px}
+.kpi{padding:16px 18px;min-height:92px}
+.kpi b{font-size:38px;font-weight:800;letter-spacing:-.02em}
+.kpi span{font-size:14px;font-weight:500}
+.ringlab b{font-size:38px;font-weight:800}
+.tcard{background:linear-gradient(135deg,var(--surface) 0%,var(--row-b) 100%);border-radius:12px}
+.tcard .tn{font-size:14px}
+.tcard .tv{font-size:19px;font-weight:700}
+input,select,textarea{border-radius:10px;padding:10px 12px;font-size:15px}
+#busca,#filaBusca{background:var(--surface);box-shadow:var(--shadow)}
+button.btn{font-size:15px;border-radius:10px;padding:10px 16px}
+button.btn.pri{background:linear-gradient(135deg,var(--accent),color-mix(in srgb,var(--accent) 75%,#000));box-shadow:0 4px 12px -6px var(--accent)}
+.chip{font:600 13px var(--f-body);padding:6px 12px}
+/* Tabelas */
+.scroll{border-radius:var(--r)}
+table{font-size:15px}
+th,td{padding:12px 14px;border-bottom:0}
+th{font:700 11.5px var(--f-body);letter-spacing:.08em;color:color-mix(in srgb,var(--ink) 70%,var(--muted));background:linear-gradient(180deg,var(--surface2),color-mix(in srgb,var(--surface2) 70%,var(--surface)));box-shadow:inset 0 -2px 0 var(--accent);z-index:2}
+tbody tr{background:var(--surface);position:relative}
+/* Faixas em degradê alternadas: cor da Jopec na esquerda, sumindo para a direita */
+tbody tr:nth-child(odd){background:linear-gradient(90deg,var(--row-a) 0%,color-mix(in srgb,var(--row-a) 45%,var(--surface)) 45%,var(--surface) 100%)}
+tbody tr:nth-child(even){background:linear-gradient(90deg,var(--row-b) 0%,var(--surface) 100%)}
+/* Divisória em degradê entre as linhas */
+tbody td{background-image:linear-gradient(90deg,color-mix(in srgb,var(--accent) 45%,transparent),color-mix(in srgb,var(--line) 90%,transparent) 50%,transparent);background-size:100% 1px;background-repeat:no-repeat;background-position:bottom;background-attachment:local}
+tbody tr:last-child td{background-image:none}
+tbody tr:hover{background:linear-gradient(90deg,color-mix(in srgb,var(--accent) 22%,var(--surface)) 0%,color-mix(in srgb,var(--accent) 7%,var(--surface)) 60%,var(--surface) 100%)}
+tbody tr:hover td{background-color:transparent}
+td.name{font-weight:700;font-size:15px;letter-spacing:-.005em;min-width:220px}
+td.name button{display:inline}
+/* Coluna Empresa fixa na grade */
+.grid td.name{position:sticky;left:0;z-index:1;background-color:inherit}
+.grid tbody td.name{--div:linear-gradient(90deg,color-mix(in srgb,var(--accent) 45%,transparent),color-mix(in srgb,var(--accent) 30%,var(--line)));}
+.grid tbody tr:nth-child(odd) td.name{background:var(--div) bottom/100% 1px no-repeat,var(--row-a)}
+.grid tbody tr:nth-child(even) td.name{background:var(--div) bottom/100% 1px no-repeat,var(--row-b)}
+.grid tbody tr:hover td.name{background:var(--div) bottom/100% 1px no-repeat,color-mix(in srgb,var(--accent) 22%,var(--surface))}
+.grid tbody tr:last-child td.name{background-image:none}
+.grid thead th:first-child{position:sticky;left:0;z-index:3}
+.grid td.name{box-shadow:6px 0 10px -8px rgb(0 0 0 / .25)}
+.grid th{text-align:center}.grid th:first-child{text-align:left}
+.grid td.c{padding:6px 4px}
+.cell{min-width:62px;border-radius:8px;padding:7px 6px;font:600 12px var(--f-mono);box-shadow:inset 0 0 0 1px color-mix(in srgb,currentColor 18%,transparent);transition:transform .12s}
+.cell:hover{transform:scale(1.06)}
+.cell.s-ok{background:var(--ok-bg);color:var(--ok)} .cell.s-atencao,.cell.s-renovar{background:var(--warn-bg);color:var(--warn)}
+.cell.s-venc{background:var(--bad-bg);color:var(--bad)} .cell.s-pend{background:var(--pend-bg);color:var(--pend)} .cell.s-and{background:var(--info-bg);color:var(--info)}
+.cell.s-sem,.cell.s-subst{background:transparent;color:color-mix(in srgb,var(--none) 70%,transparent);box-shadow:none}
+.pill{font-size:12.5px;padding:4px 10px}
+#fila td:first-child{box-shadow:inset 5px 0 0 var(--sev,transparent);padding-left:18px}
+dialog{border-radius:18px;box-shadow:0 30px 80px -20px rgb(0 0 0 / .5)}
+dialog .dh h2{font-size:21px}
+.legend{font-size:13px}
+#fila td.obs{min-width:200px;max-width:280px}#fila td.name{min-width:160px}#fila td:nth-child(2){min-width:170px}#fila td:last-child{padding-right:16px}
+.clamp{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;line-height:1.4}
+#fila td.mono{white-space:nowrap}
+a.emit{display:inline-block;font:700 13px var(--f-body);color:var(--accent);text-decoration:none;border:1.5px solid color-mix(in srgb,var(--accent) 55%,transparent);border-radius:999px;padding:5px 12px;background:var(--surface);white-space:nowrap}
+a.emit:hover{background:var(--accent);color:var(--accent-ink)}
+@media (max-width:600px){body{font-size:15.5px}th,td{padding:10px 10px}td.name{min-width:160px;font-size:14.5px}.panel{padding:16px}h2{font-size:20px}.kpi b{font-size:32px}}
 @media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
 </style>
 
@@ -347,7 +418,7 @@ function renderPainel(){
   if(!EMP.length){tb.innerHTML='<tr><td colspan="6" class="empty">Nenhuma empresa ainda. Vá em <b>Importar e backup</b> e importe a planilha, ou cadastre em <b>Empresas</b>.</td></tr>';return;}
   if(!F.length){tb.innerHTML='<tr><td colspan="6" class="empty">Nada nesta fila. Tudo em dia.</td></tr>';return;}
   tb.innerHTML=F.slice(0,400).map(x=>{const n=x.i.n;const d=n===null?'':(n<0?' · venceu há '+(-n)+'d':' · '+n+'d');
-    return '<tr data-e="'+esc(x.e.id)+'" data-t="'+x.t.k+'" style="cursor:pointer;--sev:var(--'+({venc:'bad',renovar:'warn',pend:'pend',and:'info',atencao:'warn'}[x.i.est])+')"><td class="name">'+esc(x.e.nome)+'</td><td>'+esc(x.t.n)+'</td><td class="mono">'+br(x.i.val)+(x.i.manual?' *':'')+'</td><td>'+pill(x.i.est,EST[x.i.est]+d)+'</td><td class="mono">'+br(x.i.renovar)+'</td><td class="small muted">'+esc([x.t.legado?'Renovar emitindo a CND Estadual RJ conjunta':'',x.i.c.status,x.i.c.obs].filter(Boolean).join(' · ').slice(0,140))+'</td><td>'+(LINKS[x.t.k]?'<a class="link emit" href="'+esc(LINKS[x.t.k])+'" target="_blank" rel="noopener" data-copy="'+esc(chaveDe(x.e,x.t.k))+'">Emitir</a>':'')+'</td></tr>';}).join('');
+    return '<tr data-e="'+esc(x.e.id)+'" data-t="'+x.t.k+'" style="cursor:pointer;--sev:var(--'+({venc:'bad',renovar:'warn',pend:'pend',and:'info',atencao:'warn'}[x.i.est])+')"><td class="name">'+esc(x.e.nome)+'</td><td>'+esc(x.t.n)+'</td><td class="mono">'+br(x.i.val)+(x.i.manual?' *':'')+'</td><td>'+pill(x.i.est,EST[x.i.est]+d)+'</td><td class="mono">'+br(x.i.renovar)+'</td><td class="small muted obs">'+(o=>'<div class="clamp" title="'+esc(o)+'">'+esc(o)+'</div>')([x.t.legado?'Renovar emitindo a CND Estadual RJ conjunta':'',x.i.c.status,x.i.c.obs].filter(Boolean).join(' · ').slice(0,220))+'</td><td>'+(LINKS[x.t.k]?'<a class="link emit" href="'+esc(LINKS[x.t.k])+'" target="_blank" rel="noopener" data-copy="'+esc(chaveDe(x.e,x.t.k))+'">Emitir</a>':'')+'</td></tr>';}).join('');
   const H=HIST.slice(0,12);
   $('#hist').innerHTML=H.length?H.map(h=>'<div style="padding:4px 0;border-bottom:1px solid var(--line)"><span class="mono muted">'+esc((h.em||'').slice(0,16).replace('T',' '))+'</span> · <b>'+esc(h.empresa)+'</b> · '+esc(h.texto)+'</div>').join(''):'<span class="muted">Os lançamentos aparecem aqui.</span>';
   desenhar();
