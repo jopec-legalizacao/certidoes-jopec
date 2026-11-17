@@ -187,8 +187,8 @@ dialog .df{padding:12px 16px;border-top:1px solid var(--line);display:flex;gap:8
     <div class="split">
       <div class="panel">
         <h2>Anexar certidões</h2>
-        <p class="muted small" style="margin:0">Emitiu a certidão no site? Arraste o PDF aqui. O sistema lê o CNPJ, descobre a empresa e o tipo de certidão, pega a emissão e a validade, e você confere antes de salvar. Pode mandar vários de uma vez.</p>
-        <div class="drop" id="cDrop">Arraste os PDFs aqui ou <button class="link" id="cPick">escolha os arquivos</button><input type="file" id="cFiles" multiple accept="application/pdf" hidden></div>
+        <p class="muted small" style="margin:0">Emitiu a certidão no site? Arraste o PDF aqui (ou foto/PDF escaneado, que o sistema lê com OCR). O sistema lê o CNPJ, descobre a empresa e o tipo de certidão, pega a emissão e a validade, e você confere antes de salvar. Pode mandar vários de uma vez.</p>
+        <div class="drop" id="cDrop">Arraste os PDFs ou fotos aqui ou <button class="link" id="cPick">escolha os arquivos</button><input type="file" id="cFiles" multiple accept="application/pdf,image/*" hidden></div>
         <span class="small muted" id="cMsg"></span>
       </div>
       <div class="panel" hidden>
@@ -440,19 +440,19 @@ const CAMPOS=[['nome','Nome curto'],['razao','Razão social'],['fantasia','Nome 
 function formEmpresa(e){
   const n=!e;e=e||{};
   const sn=e.simples===true?'sim':e.simples===false?'nao':'';
-  abrir(n?'Nova empresa':'Editar '+e.nome,'<div class="drop" id="eDrop">Arraste aqui o <b>cartão CNPJ</b>, o comprovante de <b>inscrição municipal</b> e o de <b>inscrição estadual</b> (PDF) que o formulário se preenche sozinho, ou <button class="link" id="ePick">escolha os arquivos</button><input type="file" id="eFiles" multiple accept="application/pdf" hidden></div><span class="small muted" id="eMsg"></span>'+
+  abrir(n?'Nova empresa':'Editar '+e.nome,'<div class="drop" id="eDrop">Arraste aqui o <b>cartão CNPJ</b>, o comprovante de <b>inscrição municipal</b> e o de <b>inscrição estadual</b> (PDF ou foto) que o formulário se preenche sozinho, ou <button class="link" id="ePick">escolha os arquivos</button><input type="file" id="eFiles" multiple accept="application/pdf,image/*" hidden></div><span class="small muted" id="eMsg"></span>'+
    '<div class="row"><span class="small muted">Simples Nacional:</span><div class="chips" id="snBox">'+[['sim','Sim'],['nao','Não'],['','Não informado']].map(([v,l])=>'<button type="button" class="chip" data-sn="'+v+'" aria-pressed="'+(sn===v)+'">'+l+'</button>').join('')+'</div></div>'+
    '<div class="formgrid">'+CAMPOS.map(([k,l])=>'<label class="f">'+l+'<input id="c_'+k+'" value="'+esc(e[k]||'')+'"></label>').join('')+'</div>','<button class="btn pri" id="cOk">Salvar</button>');
   let snv=sn;$('#snBox').onclick=ev=>{const b=ev.target.closest('[data-sn]');if(!b)return;snv=b.dataset.sn;$('#snBox').querySelectorAll('.chip').forEach(c=>c.setAttribute('aria-pressed',c===b));};
   const preencher=async files=>{$('#eMsg').textContent='Lendo…';const lidos=[];
-    for(const f of files){try{const r=lerCadastro(await pdfItems(f));if(!r.docs.length){lidos.push(f.name+': não reconheci o documento');continue;}
+    for(const f of files){try{const r=lerCadastro(await lerArquivo(f,m=>$('#eMsg').textContent=m));if(!r.docs.length){lidos.push(f.name+': não reconheci o documento');continue;}
       [['razao','razao'],['fantasia','fantasia'],['cnpj','cnpj'],['im','im'],['ie','ie'],['natureza','natureza'],['cep','cep'],['endereco','endereco'],['bairro','bairro'],['cidade','cidade'],['uf','uf'],['tel','tel'],['email','email']].forEach(([a,b])=>{if(r[a]&&$('#c_'+b))$('#c_'+b).value=r[a];});
       if(r.situacaoIM&&!/ATIV/.test(r.situacaoIM)){const o=$('#c_obs');o.value=(o.value?o.value+' | ':'')+'Inscrição municipal: '+r.situacaoIM;}
       if(!$('#c_nome').value&&(r.fantasia||r.razao))$('#c_nome').value=(r.fantasia||r.razao).replace(/\s+(LTDA|EIRELI|ME|EPP|S\/?A)\.?$/i,'');
       lidos.push(f.name+': '+r.docs.join(', '));}catch(err){lidos.push(f.name+': não consegui ler');}}
     $('#eMsg').textContent=lidos.join(' · ')+'. Confira os campos antes de salvar.';};
   $('#ePick').onclick=()=>$('#eFiles').click();$('#eFiles').onchange=ev=>{preencher([...ev.target.files]);ev.target.value='';};
-  const ed=$('#eDrop');ed.ondragover=ev=>{ev.preventDefault();ed.classList.add('over');};ed.ondragleave=()=>ed.classList.remove('over');ed.ondrop=ev=>{ev.preventDefault();ed.classList.remove('over');preencher([...ev.dataTransfer.files].filter(f=>/pdf/.test(f.type)));};
+  const ed=$('#eDrop');ed.ondragover=ev=>{ev.preventDefault();ed.classList.add('over');};ed.ondragleave=()=>ed.classList.remove('over');ed.ondrop=ev=>{ev.preventDefault();ed.classList.remove('over');preencher([...ev.dataTransfer.files].filter(f=>/pdf|image/.test(f.type)));};
   $('#cOk').onclick=async()=>{const d={};CAMPOS.forEach(([k])=>d[k]=$('#c_'+k).value.trim());if(!d.nome)return toast('Informe o nome da empresa.');d.simples=snv==='sim'?true:snv==='nao'?false:null;d.cnpj=d.cnpj.replace(/\D/g,'');d.im=d.im.replace(/\D/g,'');d.ie=d.ie.replace(/\D/g,'');
     if(n&&d.cnpj&&EMP.some(x=>String(x.cnpj||'').replace(/\D/g,'')===d.cnpj))return toast('Já existe uma empresa com esse CNPJ.');
     d.prazos=Object.assign({},e.prazos||{});delete d.prazos.SEFAZ;
@@ -596,6 +596,28 @@ function lerCadastro(items){
     let ie=_valor(items,/INSCRICAO ESTADUAL/);if(!_dig(ie)){const m=/INSCRICAO ESTADUAL[^0-9]{0,30}([\d.\-\/]{6,})/.exec(T);ie=m?m[1]:'';}out.ie=_dig(ie);
     if(!out.cnpj){const c=(_texto(items).match(_CNPJ)||[])[0];out.cnpj=_dig(c);}
   }
+  return _reforco(out,_texto(items));
+}
+
+
+/* reforço por texto, para PDFs escaneados e fotos (OCR) */
+function _reforco(out,raw){
+  const L=raw.split('\n').map(_norm).filter(Boolean),S=L.map(_sem);
+  const depois=re=>{const i=S.findIndex(x=>re.test(x));return i>=0&&i+1<L.length?L[i+1]:'';};
+  if(!out.cnpj){const c=(raw.replace(/[–—]/g,'-').match(_CNPJ)||[])[0];if(c)out.cnpj=_dig(c);}
+  if(out.docs.includes('Cartão CNPJ')){
+    if(!out.razao){const r=depois(/NOME EMPRESARIAL/);if(r)out.razao=r.replace(/\s*\d{2}\/\d{2}\/\d{4}\s*$/,'');}
+    if(!out.fantasia){const f=depois(/FANTASIA/);if(f&&!/DESCRI|ATIVIDADE/.test(_sem(f))){const v=f.replace(/\s*\b(ME|EPP|DEMAIS)\s*$/,'').replace(/\*+/g,'').trim();if(v)out.fantasia=v;}}
+    if(!out.natureza){const m=/^(\d{3}-\d)\s*-\s*(.+)$/m.exec(L.join('\n'));if(m){out.natureza=m[1]+' - '+m[2]+(m[1]==='206-2'?' – JUCERJA':m[1]==='224-0'?' – RCPJ':'');}}
+    if(!out.endereco){const e=depois(/GRADOURO/);if(e)out.endereco=e.replace(/\b0+(\d+)\b/,'$1');}
+    const lc=L.find(x=>/\d{2}\.?\d{3}-\d{3}/.test(x));
+    if(lc&&!out.cep){const m=/(\d{2}\.?\d{3}-\d{3})\s+(.*?)\s+([A-Z]{2})$/.exec(lc);if(m){out.cep=_dig(m[1]);out.uf=m[3];const meio=m[2];const cid=['RIO DE JANEIRO','NITEROI','SAO GONCALO','DUQUE DE CAXIAS','NOVA IGUACU','PETROPOLIS','MARICA','CABO FRIO','SAO PAULO'].find(c=>_sem(meio).endsWith(c));
+      if(cid){out.cidade=meio.slice(meio.length-cid.length);out.bairro=meio.slice(0,meio.length-cid.length).trim();}else out.bairro=meio;}}
+    if(!out.tel){const t=/\(\d{2}\)\s?\d{4,5}-?\d{4}/.exec(raw);if(t)out.tel=t[0];}
+    if(!out.email){const em=/[\w.\-]+@[\w.\-]+\.[a-z]{2,}/i.exec(raw);if(em)out.email=em[0];}
+  }
+  if(out.docs.includes('Inscrição municipal')&&!out.im){const m=/INSCRICAO MUNICIPAL:?\s*([\d.\-]{5,})/.exec(_sem(raw));const v=m?m[1]:depois(/INSCRICAO MUNICIPAL/);if(_dig(v))out.im=_dig(v).slice(0,10);}
+  if(out.docs.includes('Inscrição estadual')&&!out.ie){const v=depois(/INSCRICAO ESTADUAL/);if(_dig(v))out.ie=_dig(v);}
   return out;
 }
 
@@ -642,11 +664,38 @@ async function pdfItems(file){
   for(let p=1;p<=Math.min(pdf.numPages,3);p++){const pg=await pdf.getPage(p);const tc=await pg.getTextContent();tc.items.forEach(i=>{if(i.str&&i.str.trim())it.push({str:i.str,x:i.transform[4],y:i.transform[5]-(p-1)*2000});});}
   return it;
 }
+
+async function pdfDoc(file){
+  await loadScript('https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js');
+  await loadScript('https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js');
+  return window.pdfjsLib.getDocument({data:new Uint8Array(await file.arrayBuffer())}).promise;
+}
+let _tw=null;
+async function ocrItens(src){
+  await loadScript('https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js');
+  if(!_tw)_tw=await Tesseract.createWorker('por');
+  const {data}=await _tw.recognize(src);
+  return (data.lines||[]).map(l=>({str:String(l.text||'').trim(),x:l.bbox.x0,y:-l.bbox.y0})).filter(i=>i.str);
+}
+async function lerArquivo(file,status){
+  const ehPdf=/pdf/.test(file.type)||/\.pdf$/i.test(file.name);
+  if(ehPdf){
+    const it=await pdfItems(file);
+    if(it.map(i=>i.str).join('').replace(/\s/g,'').length>60)return it;
+    status&&status(file.name+': PDF escaneado, lendo com OCR (pode levar uns 20 segundos)…');
+    const pdf=await pdfDoc(file);const out=[];
+    for(let p=1;p<=Math.min(pdf.numPages,2);p++){const pg=await pdf.getPage(p);const vp=pg.getViewport({scale:2.2});const c=document.createElement('canvas');c.width=vp.width;c.height=vp.height;
+      await pg.render({canvasContext:c.getContext('2d'),viewport:vp}).promise;(await ocrItens(c)).forEach(i=>out.push(Object.assign(i,{y:i.y-(p-1)*100000})));}
+    return out;
+  }
+  status&&status(file.name+': foto, lendo com OCR (pode levar uns 20 segundos)…');
+  return ocrItens(file);
+}
 function acharEmpresa(cnpjs){const L=EMP.filter(e=>e.ativo!==false);for(const c of cnpjs){const e=L.find(e=>String(e.cnpj||'').replace(/\D/g,'')===c);if(e)return e;}
   for(const c of cnpjs){const b=c.slice(0,8);const e=L.find(e=>String(e.cnpj||'').replace(/\D/g,'').slice(0,8)===b);if(e)return e;}return null;}
 async function anexarCertidoes(files){
   if(!files.length)return;$('#cMsg').textContent='Lendo '+files.length+' arquivo(s)…';const duv=[];REV=[];
-  for(const f of files){try{const r=lerCertidao(await pdfItems(f));const e=acharEmpresa(r.cnpjs);
+  for(const f of files){try{const r=lerCertidao(await lerArquivo(f,m=>$('#cMsg').textContent=m));const e=acharEmpresa(r.cnpjs);
     if(!r.tipo)duv.push(f.name+': não identifiquei o tipo de certidão, escolha na tabela');
     if(!e)duv.push(f.name+': CNPJ '+(r.cnpjs[0]||'não encontrado')+' não está cadastrado');
     if(!r.emissao)duv.push(f.name+': não achei a data de emissão');
@@ -657,7 +706,7 @@ async function anexarCertidoes(files){
 }
 $('#cPick').onclick=()=>$('#cFiles').click();
 $('#cFiles').onchange=e=>{anexarCertidoes([...e.target.files]);e.target.value='';};
-{const d=$('#cDrop');d.ondragover=e=>{e.preventDefault();d.classList.add('over');};d.ondragleave=()=>d.classList.remove('over');d.ondrop=e=>{e.preventDefault();d.classList.remove('over');anexarCertidoes([...e.dataTransfer.files].filter(f=>/pdf/.test(f.type)));};}
+{const d=$('#cDrop');d.ondragover=e=>{e.preventDefault();d.classList.add('over');};d.ondragleave=()=>d.classList.remove('over');d.ondrop=e=>{e.preventDefault();d.classList.remove('over');anexarCertidoes([...e.dataTransfer.files].filter(f=>/pdf|image/.test(f.type)));};}
 
 /* ---------- perguntar ---------- */
 const SUGS=['Quais certidões posso pedir hoje?','Quais PGM vencem nos próximos 30 dias?','Liste as pendências de ISS que precisam de agendamento','Resumo da situação de todas as empresas'];
