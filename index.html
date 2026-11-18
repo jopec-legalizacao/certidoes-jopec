@@ -228,6 +228,28 @@ button.mini:hover{border-color:var(--accent);color:var(--accent)}
 .rtipo:hover{border-color:var(--accent)}
 .rtipo:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .rtipo[aria-pressed="true"]{border-color:var(--accent);box-shadow:inset 0 0 0 1.5px var(--accent);background:linear-gradient(135deg,color-mix(in srgb,var(--accent) 12%,var(--surface)),var(--surface))}
+.pform{display:flex;flex-direction:column;gap:14px}
+.pform .f > span{font-size:13px;color:var(--muted)}
+#pCert .chip,#pSit .chip{font-size:14px;padding:8px 14px}
+#pEmp{font-size:16px;padding:12px 14px}
+.plista{display:flex;flex-direction:column;gap:16px}
+.pgrp{border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.pgrp h3{display:flex;align-items:center;gap:10px;margin:0;padding:10px 14px;background:linear-gradient(90deg,color-mix(in srgb,var(--accent) 14%,var(--surface)),var(--surface));border-bottom:1px solid var(--line)}
+.pgrp h3 em{font:600 13px var(--f-body);font-style:normal;color:var(--muted);margin-left:auto}
+.prow{display:grid;grid-template-columns:minmax(150px,1.1fr) minmax(200px,2fr) minmax(130px,.9fr) auto;gap:6px 16px;align-items:center;padding:12px 14px;border-bottom:1px solid color-mix(in srgb,var(--line) 70%,transparent)}
+.prow:nth-child(odd){background:linear-gradient(90deg,var(--row-a),var(--surface) 70%)}
+.prow:last-child{border-bottom:0}
+.prow .pn{font-weight:700}
+.prow .pn button{all:unset;cursor:pointer}.prow .pn button:hover{text-decoration:underline}
+.prow .ps b{display:block;font-weight:700;white-space:normal;word-break:break-word}
+.prow .ps small{display:block;color:var(--muted);white-space:normal;word-break:break-word;margin-top:2px}
+.prow .pq{font-size:13px}
+.prow .pq .tag{display:inline-block;font:700 12px var(--f-body);border-radius:999px;padding:3px 9px}
+.tag.pronta{background:var(--ok-bg);color:var(--ok)}.tag.espera{background:var(--info-bg);color:var(--info)}.tag.atraso{background:var(--warn-bg);color:var(--warn)}.tag.pend{background:var(--pend-bg);color:var(--pend)}
+.prow .acts{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+@media (max-width:760px){.prow{grid-template-columns:1fr}.prow .acts{justify-content:flex-start}}
+.qchips{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.qchips input[type=date]{padding:5px 8px;font-size:13px}
 @media (max-width:600px){body{font-size:15.5px}th,td{padding:10px 10px}td.name{min-width:160px;font-size:14.5px}.panel{padding:16px}h2{font-size:20px}.kpi b{font-size:32px}}
 @media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
 </style>
@@ -242,6 +264,7 @@ button.mini:hover{border-color:var(--accent);color:var(--accent)}
     <nav class="tabs" role="tablist" id="tabs">
       <button role="tab" data-v="painel" aria-selected="true">Painel</button>
       <button role="tab" data-v="lote" aria-selected="false">Renovar em lote <span class="tbadge" id="bLote" hidden></span></button>
+      <button role="tab" data-v="pedidos" aria-selected="false">Solicitadas <span class="tbadge" id="bPed" hidden></span></button>
       <button role="tab" data-v="empresas" aria-selected="false">Empresas</button>
       <button role="tab" data-v="lancar" aria-selected="false">Lançar certidões</button>
       <button role="tab" data-v="perguntar" aria-selected="false" hidden>Perguntar à IA</button>
@@ -289,6 +312,28 @@ button.mini:hover{border-color:var(--accent);color:var(--accent)}
       <p class="note" id="lDica">Como funciona: clique em <b>Emitir a próxima</b>. O app copia o CNPJ (ou a inscrição municipal, no ISS) e abre o site do órgão; é só colar. A empresa fica marcada com ✓ e a próxima vez segue para a seguinte. Emitiu? Arraste os PDFs no quadro abaixo que o sistema lança sozinho.</p>
       <div class="drop" id="lDrop">Arraste aqui os PDFs ou fotos das certidões que acabou de emitir, ou <button class="link" id="lPick">escolha os arquivos</button><input type="file" id="lFilesL" multiple accept="application/pdf,image/*" hidden></div>
       <div class="scroll"><table class="lote"><thead><tr><th style="width:34px"></th><th>Empresa</th><th>CNPJ / Inscrição</th><th>Validade</th><th>Situação</th><th>Observação</th><th style="text-align:right">Ações</th></tr></thead><tbody id="lLista"></tbody></table></div>
+    </div>
+  </section>
+
+  <!-- SOLICITADAS -->
+  <section class="view" id="v-pedidos" hidden>
+    <div class="panel">
+      <div class="row"><h2 class="grow">Registrar pedido</h2><span class="small muted">Pediu uma certidão que não sai na hora? Registre aqui em segundos.</span></div>
+      <form id="pForm" class="pform" autocomplete="off">
+        <label class="f">Empresa<input id="pEmp" list="pEmpL" placeholder="Digite o nome ou o CNPJ" required><datalist id="pEmpL"></datalist></label>
+        <div class="f"><span>Certidão <span class="muted">(pode marcar mais de uma)</span></span><div class="chips" id="pCert"></div></div>
+        <div class="f"><span>Situação</span><div class="chips" id="pSit"></div></div>
+        <div class="formgrid">
+          <label class="f"><span id="pDataLab">Data do pedido</span><input type="date" id="pData" required></label>
+          <label class="f">Protocolo ou observação <span class="muted">(opcional)</span><input id="pProt" placeholder="Ex.: protocolo 5106120200"></label>
+        </div>
+        <div class="row"><button class="btn pri" type="submit" id="pSave">Salvar pedido</button><span class="small" id="pMsg"></span></div>
+      </form>
+    </div>
+    <div class="panel">
+      <div class="row"><h2 class="grow">Certidões solicitadas</h2><input id="pBusca" placeholder="Filtrar empresa" aria-label="Filtrar empresa" style="flex:0 1 220px"></div>
+      <div class="row"><span class="small muted">Mostrar:</span><div class="chips" id="pFil"></div></div>
+      <div id="pLista" class="plista"></div>
     </div>
   </section>
 
@@ -462,8 +507,8 @@ function info0(e,k){
   const s=String(c.status||'');let est;
   const n=val?dias(val):null;
   if(t.legado){const nova=(e.certs||{}).EST;if(nova&&(nova.emissao||nova.status))return {c,val,n,est:'subst',renovar:null,manual:!!c.validade};}
-  if(/SOLICITAD|PRONTO|PROTOCOLO|AGUARD|REQUERID|EM AN[AÁ]LISE/i.test(s)&&!(n!==null&&n>t.ant))est='and';
-  else if(/PEND|AGENDAMENTO|POSITIVA(?! COM EFEITO)|EXIG|IRREGULAR/i.test(s)&&!(n!==null&&n>t.ant))est='pend';
+  if(/SOLICITAD|PRONT[OA]|PROTOCOLO|AGUARD|REQUERID|EM AN[AÁ]LISE/i.test(s)&&!/AGENDAD|EXIG/i.test(s)&&!(n!==null&&n>t.ant))est='and';
+  else if(/PEND|AGENDAMENTO|AGENDAD|POSITIVA(?! COM EFEITO)|EXIG|IRREGULAR/i.test(s)&&!(n!==null&&n>t.ant))est='pend';
   else if(!val)est='sem';
   else if(n<0)est='venc';
   else if(n<=t.ant)est='renovar';
@@ -482,7 +527,7 @@ $('#tabs').onclick=e=>{const b=e.target.closest('button');if(b)view(b.dataset.v)
 addEventListener('hashchange',()=>{const v=location.hash.slice(1);if(document.getElementById('v-'+v))view(v);});
 
 /* ---------- render ---------- */
-function render(){renderPainel();renderGrid();renderSelects();renderLote();renderRelForm();}
+function render(){renderPainel();renderGrid();renderSelects();renderLote();renderRelForm();renderPedidos();}
 function linhas(){const out=[];ativos().forEach(e=>{if(e.ativo===false)return;TV.forEach(t=>{const i=info(e,t.k);if(i.est==='sem'||i.est==='ok'||i.est==='subst'||i.est==='na')return;out.push({e,t,i});});});return out;}
 function renderPainel(){
   requestAnimationFrame(desenhar);
@@ -566,6 +611,7 @@ function editCert(id,k){
    (c.na?'<p class="note">Marcada como <b>não se aplica</b>: esta certidão não é acompanhada para esta empresa.</p>':'')+'<div class="row">'+emitirHTML(e,k)+'</div>'+
    '<div class="formgrid"><label class="f">Data de emissão<span class="row" style="gap:6px;flex-wrap:nowrap"><input type="date" id="eEmi" value="'+esc(c.emissao||'')+'" style="flex:1"><button type="button" class="btn" id="eHoje">Hoje</button></span></label>'+
    '<label class="f">Situação<input id="eSt" value="'+esc(c.status||'')+'" placeholder="NEGATIVA, PRONTO EM…"></label></div>'+
+   '<div class="qchips"><span class="small muted">Rápido:</span><button type="button" class="chip" data-q="sol">Solicitada hoje</button><label class="chip" style="display:inline-flex;gap:6px;align-items:center">Pronta em <input type="date" id="eProntaD"></label><button type="button" class="chip" data-q="neg">NEGATIVA</button><button type="button" class="chip" data-q="pcen">POSITIVA C/ EFEITO DE NEGATIVA</button></div>'+
    '<label class="row small"><input type="checkbox" id="eVOn" '+(c.validade?'checked':'')+'> Validade diferente do prazo padrão (ex.: certidão de regularização)</label>'+
    '<label class="f" id="eVBox" '+(c.validade?'':'hidden')+'>Validade real<input type="date" id="eVal" value="'+esc(c.validade||'')+'"></label>'+
    '<label class="f">Observação<textarea id="eObs" style="min-height:70px">'+esc(c.obs||'')+'</textarea></label>'+
@@ -573,7 +619,9 @@ function editCert(id,k){
    '<button class="btn" id="eNa">'+(c.na?'Voltar a acompanhar':'Não se aplica a esta empresa')+'</button><button class="btn" id="eClr">Limpar certidão</button><button class="btn pri" id="eOk">Salvar</button>');
   $('#eNa').onclick=async()=>{await salvarCert(id,k,c.na?{emissao:null,validade:null,status:'',obs:''}:{na:true,emissao:null,validade:null,status:'',obs:c.obs||''});dlg.close();};
   const calc=()=>{const v=$('#eVOn').checked?$('#eVal').value:($('#eEmi').value?add($('#eEmi').value,prazoDe(e,k)):'');$('#eCalc').innerHTML=v?'Válida até <b class="mono">'+br(v)+'</b> · renovar a partir de <b class="mono">'+br(add(v,-t.ant))+'</b>':'<span class="muted">Informe a data de emissão para calcular a validade.</span>';};
-  ['eEmi','eVal'].forEach(x=>$('#'+x).oninput=calc);$('#eHoje').onclick=()=>{$('#eEmi').value=hojeISO();if(!$('#eSt').value)$('#eSt').value='NEGATIVA';calc();};$('#eVOn').onchange=()=>{$('#eVBox').hidden=!$('#eVOn').checked;calc();};calc();
+  ['eEmi','eVal'].forEach(x=>$('#'+x).oninput=calc);$('#eHoje').onclick=()=>{$('#eEmi').value=hojeISO();if(!$('#eSt').value||REQ.test($('#eSt').value))$('#eSt').value='NEGATIVA';calc();};
+  document.querySelector('#dB .qchips').onclick=ev=>{const b=ev.target.closest('[data-q]');if(!b)return;const q=b.dataset.q;$('#eSt').value=q==='sol'?compoeStatus('sol',hojeISO(),'',$('#eSt').value):q==='neg'?'NEGATIVA':'POSITIVA COM EFEITO DE NEGATIVA';};
+  $('#eProntaD').onchange=ev=>{if(ev.target.value)$('#eSt').value=compoeStatus('pronta',ev.target.value,'',$('#eSt').value);};$('#eVOn').onchange=()=>{$('#eVBox').hidden=!$('#eVOn').checked;calc();};calc();
   $('#eOk').onclick=async()=>{await salvarCert(id,k,{emissao:$('#eEmi').value||null,validade:$('#eVOn').checked&&$('#eVal').value?$('#eVal').value:null,status:$('#eSt').value.trim(),obs:$('#eObs').value.trim()});dlg.close();};
   $('#eClr').onclick=async()=>{await salvarCert(id,k,{emissao:null,validade:null,status:'',obs:''});dlg.close();};
 }
@@ -1046,6 +1094,58 @@ function gerarRelatorio(tipo,o){o=o||{};const d=dadosRel(tipo,o);const now=new D
   w.document.open();w.document.write(html);w.document.close();}
 
 addEventListener('keydown',e=>{if(e.key==='/'&&!/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName)&&!dlg.open){const v=document.querySelector('section.view:not([hidden])');const i=v&&v.querySelector('input[placeholder]');if(i){e.preventDefault();i.focus();}}});
+
+/* ---------- solicitadas ---------- */
+const REQ=/SOLICITAD|PRONT[OA]|PROTOCOLO|AGUARD|REQUERID|EM AN[AÁ]LISE|AGENDAMENTO|AGENDAD|EXIG/i;
+const SIT=[['sol','Solicitada','Data do pedido'],['pronta','Pronta em','Fica pronta em'],['prot','Protocolo aberto','Data do protocolo'],['agend','Agendada','Data do agendamento'],['exig','Com exigência','Data da exigência']];
+function compoeStatus(tipo,d,prot,old){const D=br(d);let st={sol:'SOLICITADA em '+D,pronta:'PRONTA em '+D,prot:'PROTOCOLO em '+D,agend:'AGENDADA para '+D,exig:'EXIGÊNCIA em '+D}[tipo];
+  old=String(old||'');const keep=[];if(tipo!=='sol'){const m=old.match(/SOLICITADA em \d{2}\/\d{2}\/\d{4}/i);if(m)keep.push(m[0]);}
+  const pr=old.match(/protocolo\s*(n[ºo°.]*\s*)?[\d./-]{4,}/i);if(pr&&!(prot&&/\d{4,}/.test(prot)))keep.push(pr[0]);
+  return [st,prot].concat(keep).filter(Boolean).join(' · ');}
+function tipoPedido(s){s=String(s||'');if(/PRONT[OA]/i.test(s))return 'pronta';if(/AGENDAMENTO|AGENDAD|EXIG|PEND/i.test(s))return 'pend';return 'sol';}
+function dataEm(s,re){const m=String(s||'').match(re);return m?brToIso(m[1]):null;}
+let PS='sol',PC=new Set(),PF=new Set(['sol','pronta']);
+function pedidos(){const q=($('#pBusca').value||'').toLowerCase();const out=[];
+  EMP.filter(e=>e.ativo!==false).forEach(e=>TV.forEach(t=>{const c=((e.certs||{})[t.k])||{};if(c.na||!REQ.test(c.status||''))return;const tp=tipoPedido(c.status);out.push({e,t,c,tp,i:info(e,t.k)});}));
+  return out.filter(x=>PF.has(x.tp)&&(!q||x.e.nome.toLowerCase().includes(q)));}
+function renderPedidos(){
+  if(!$('#pCert').children.length){$('#pCert').innerHTML=TV.map(t=>'<button type="button" class="chip" data-k="'+t.k+'" aria-pressed="false" title="'+esc(t.n)+'">'+esc(t.a)+'</button>').join('');
+    $('#pSit').innerHTML=SIT.map(([k,l])=>'<button type="button" class="chip" data-s="'+k+'" aria-pressed="'+(PS===k)+'">'+l+'</button>').join('');if(!$('#pData').value)$('#pData').value=hojeISO();}
+  $('#pEmpL').innerHTML=EMP.filter(e=>e.ativo!==false).sort((a,b)=>a.nome.localeCompare(b.nome,'pt')).map(e=>'<option value="'+esc(e.nome)+'">'+esc(fmtDoc(e.cnpj)||'')+'</option>').join('');
+  const all=EMP.filter(e=>e.ativo!==false).flatMap(e=>TV.map(t=>((e.certs||{})[t.k])||{}).filter(c=>!c.na&&REQ.test(c.status||'')).map(c=>tipoPedido(c.status)));
+  const cnt={sol:0,pronta:0,pend:0};all.forEach(t=>cnt[t]++);
+  const bp=$('#bPed');bp.hidden=!(cnt.sol+cnt.pronta);bp.textContent=cnt.sol+cnt.pronta;
+  $('#pFil').innerHTML=[['sol','Solicitadas'],['pronta','Com data para ficar pronta'],['pend','Agendamento / exigência']].map(([k,l])=>'<button class="chip" data-f="'+k+'" aria-pressed="'+PF.has(k)+'">'+l+' ('+cnt[k]+')</button>').join('');
+  if(!dbOk){$('#pLista').innerHTML='<p class="empty">Carregando…</p>';return;}
+  const L=pedidos();const hj=hojeISO();
+  if(!L.length){$('#pLista').innerHTML='<p class="empty">Nenhuma certidão solicitada nesta seleção.</p>';return;}
+  $('#pLista').innerHTML=TV.map(t=>{const G=L.filter(x=>x.t.k===t.k);if(!G.length)return '';
+    G.sort((a,b)=>{const da=dataEm(a.c.status,/PRONT[OA][^\d]*(\d{1,2}\/\d{1,2}\/\d{2,4})/i)||'9',db=dataEm(b.c.status,/PRONT[OA][^\d]*(\d{1,2}\/\d{1,2}\/\d{2,4})/i)||'9';return da<db?-1:da>db?1:a.e.nome.localeCompare(b.e.nome,'pt');});
+    return '<div class="pgrp"><h3>'+esc(t.n)+'<em>'+G.length+(G.length>1?' empresas':' empresa')+'</em></h3>'+G.map(x=>{
+      const pr=dataEm(x.c.status,/PRONT[OA][^\d]*(\d{1,2}\/\d{1,2}\/\d{2,4})/i),so=dataEm(x.c.status,/(?:SOLICITAD[AO]|REQUERID[AO]|PROTOCOLO)[^\d]*(\d{1,2}\/\d{1,2}\/\d{2,4})/i);
+      let tag='';if(x.tp==='pend')tag='<span class="tag pend">'+esc(/AGEND/i.test(x.c.status)?'Agendamento':'Exigência')+'</span>';
+      else if(pr){const n=dias(pr);tag=n<=0?'<span class="tag pronta">Já pode retirar'+(n<0?' (desde '+br(pr)+')':'')+'</span>':'<span class="tag espera">Fica pronta em '+n+(n>1?' dias':' dia')+'</span>';}
+      else if(so){const n=-dias(so);tag='<span class="tag '+(n>10?'atraso':'espera')+'">Pedida há '+n+(n===1?' dia':' dias')+'</span>';}
+      else tag='<span class="tag espera">Aguardando</span>';
+      return '<div class="prow" data-e="'+esc(x.e.id)+'" data-t="'+x.t.k+'"><div class="pn"><button data-emp="'+esc(x.e.id)+'">'+esc(x.e.nome)+'</button><div class="small muted mono">'+esc(fmtDoc(chaveDe(x.e,x.t.k)))+'</div></div><div class="ps"><b>'+esc(x.c.status)+'</b>'+(x.c.obs?'<small>'+esc(x.c.obs)+'</small>':'')+'</div><div class="pq">'+tag+'<div class="small muted" style="margin-top:4px">Validade atual: <span class="mono">'+br(x.i.val)+'</span></div></div><div class="acts"><button class="mini" data-a="chegou" title="A certidão saiu: lançar emissão">Chegou</button><button class="mini" data-a="upd" title="Mudar situação (ex.: pronta em…)">Atualizar</button><button class="mini" data-a="ed">Editar</button></div></div>';}).join('')+'</div>';}).join('');
+}
+function pEmpId(){const v=$('#pEmp').value.trim();if(!v)return null;const d=v.replace(/\D/g,'');const L=EMP.filter(e=>e.ativo!==false);
+  return (L.find(e=>e.nome.toLowerCase()===v.toLowerCase())||(d.length>=8&&L.find(e=>String(e.cnpj||'').replace(/\D/g,'').startsWith(d)))||L.find(e=>e.nome.toLowerCase().startsWith(v.toLowerCase()))||{}).id||null;}
+$('#pCert').onclick=e=>{const b=e.target.closest('[data-k]');if(!b)return;const k=b.dataset.k;PC.has(k)?PC.delete(k):PC.add(k);b.setAttribute('aria-pressed',PC.has(k));};
+$('#pSit').onclick=e=>{const b=e.target.closest('[data-s]');if(!b)return;PS=b.dataset.s;$('#pSit').querySelectorAll('.chip').forEach(c=>c.setAttribute('aria-pressed',c===b));$('#pDataLab').textContent=SIT.find(x=>x[0]===PS)[2];if(PS==='sol')$('#pData').value=hojeISO();else if(PS==='pronta')$('#pData').value='';$('#pData').focus();};
+$('#pFil').onclick=e=>{const b=e.target.closest('[data-f]');if(!b)return;const k=b.dataset.f;PF.has(k)?PF.delete(k):PF.add(k);if(!PF.size)PF=new Set(['sol','pronta']);renderPedidos();};
+$('#pBusca').oninput=()=>renderPedidos();
+$('#pForm').onsubmit=async ev=>{ev.preventDefault();const id=pEmpId();if(!id){$('#pMsg').textContent='Empresa não encontrada. Escolha da lista.';return;}
+  if(!PC.size){$('#pMsg').textContent='Marque pelo menos uma certidão.';return;}const d=$('#pData').value;if(!d){$('#pMsg').textContent='Informe a data.';return;}
+  const em=emp(id);const prot=$('#pProt').value.trim();$('#pSave').disabled=true;const feitos=[];
+  for(const k of PC){const old=info0(em,k).c;const ok=await salvarCert(id,k,{emissao:old.emissao||null,validade:old.validade||null,status:compoeStatus(PS,d,prot,old.status),obs:old.obs||''},true);if(ok)feitos.push(TK[k].a);}
+  $('#pSave').disabled=false;render();$('#pMsg').innerHTML=feitos.length?'<b style="color:var(--ok)">✓ '+esc(em.nome)+': '+esc(feitos.join(', '))+' — '+esc(SIT.find(x=>x[0]===PS)[1].toLowerCase())+' '+br(d)+'</b>':'Não salvou.';
+  toast('Pedido salvo: '+em.nome);$('#pEmp').value='';$('#pProt').value='';$('#pEmp').focus();};
+$('#pLista').onclick=e=>{const n=e.target.closest('[data-emp]');if(n)return abrirEmpresa(n.dataset.emp);const b=e.target.closest('[data-a]');if(!b)return;const r=b.closest('.prow');const id=r.dataset.e,k=r.dataset.t;
+  if(b.dataset.a==='ed')return editCert(id,k);
+  if(b.dataset.a==='chegou'){editCert(id,k);$('#eHoje').click();return;}
+  if(b.dataset.a==='upd'){$('#pEmp').value=emp(id).nome;PC=new Set([k]);$('#pCert').querySelectorAll('.chip').forEach(c=>c.setAttribute('aria-pressed',c.dataset.k===k));$('#pSit').querySelector('[data-s="pronta"]').click();$('#pForm').scrollIntoView({behavior:'smooth',block:'start'});setTimeout(()=>$('#pData').focus(),350);}};
+
 /* ---------- boot ---------- */
 render();
 const v0=location.hash.slice(1);if(document.getElementById('v-'+v0))view(v0);
