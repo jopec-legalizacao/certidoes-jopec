@@ -200,6 +200,33 @@ dialog .dh h2{font-size:21px}
 #fila td.mono{white-space:nowrap}
 a.emit{display:inline-block;font:700 13px var(--f-body);color:var(--accent);text-decoration:none;border:1.5px solid color-mix(in srgb,var(--accent) 55%,transparent);border-radius:999px;padding:5px 12px;background:var(--surface);white-space:nowrap}
 a.emit:hover{background:var(--accent);color:var(--accent-ink)}
+.tbadge{display:inline-block;min-width:20px;padding:1px 6px;margin-left:4px;border-radius:999px;background:#fff;color:var(--band);font:800 11px var(--f-body);text-align:center;vertical-align:1px}
+.ltipos{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.ltipo{all:unset;box-sizing:border-box;cursor:pointer;border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:linear-gradient(135deg,var(--surface),var(--row-b));display:flex;flex-direction:column;gap:2px;transition:border-color .15s,transform .15s}
+.ltipo:hover{border-color:var(--accent);transform:translateY(-1px)}
+.ltipo:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.ltipo b{font:800 26px var(--f-display);line-height:1.1;color:var(--bad)}
+.ltipo b.zero{color:var(--ok)}
+.ltipo span{font-size:13px;font-weight:600;line-height:1.25}
+.ltipo small{font-size:12px;color:var(--muted)}
+.ltipo[aria-pressed="true"]{border-color:var(--accent);background:linear-gradient(135deg,color-mix(in srgb,var(--accent) 16%,var(--surface)),var(--surface));box-shadow:inset 0 0 0 1.5px var(--accent)}
+.prog{height:8px;border-radius:99px;background:var(--surface2);overflow:hidden;margin:8px 0 4px;max-width:420px}
+.prog i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--accent),color-mix(in srgb,var(--accent) 55%,#f2b54f));transition:width .3s}
+table.lote td.chk{text-align:center;font-size:18px;color:var(--ok);font-weight:800}
+table.lote tr.feito td{opacity:.55}
+table.lote tr.feito td.chk,table.lote tr.feito td:last-child{opacity:1}
+table.lote tr.atual{outline:2px solid var(--accent);outline-offset:-2px}
+table.lote .acts{display:flex;gap:6px;justify-content:flex-end;flex-wrap:nowrap}table.lote td.obs{min-width:150px;max-width:240px}table.lote td.name{min-width:180px}
+button.mini{font:700 12.5px var(--f-body);border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:999px;padding:5px 11px;cursor:pointer;white-space:nowrap}
+button.mini:hover{border-color:var(--accent);color:var(--accent)}
+.chave{white-space:nowrap;font:600 13px var(--f-mono);border:0;background:none;color:var(--ink);cursor:pointer;padding:0;text-decoration:underline dotted color-mix(in srgb,var(--ink) 35%,transparent);text-underline-offset:3px}
+.rtipos{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}
+.rtipo{all:unset;box-sizing:border-box;cursor:pointer;border:1px solid var(--line);border-radius:12px;padding:14px 16px;display:flex;flex-direction:column;gap:4px;background:var(--surface)}
+.rtipo b{font:700 16px var(--f-display)}
+.rtipo span{font-size:13px;color:var(--muted);line-height:1.35}
+.rtipo:hover{border-color:var(--accent)}
+.rtipo:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.rtipo[aria-pressed="true"]{border-color:var(--accent);box-shadow:inset 0 0 0 1.5px var(--accent);background:linear-gradient(135deg,color-mix(in srgb,var(--accent) 12%,var(--surface)),var(--surface))}
 @media (max-width:600px){body{font-size:15.5px}th,td{padding:10px 10px}td.name{min-width:160px;font-size:14.5px}.panel{padding:16px}h2{font-size:20px}.kpi b{font-size:32px}}
 @media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
 </style>
@@ -213,10 +240,12 @@ a.emit:hover{background:var(--accent);color:var(--accent-ink)}
     </div>
     <nav class="tabs" role="tablist" id="tabs">
       <button role="tab" data-v="painel" aria-selected="true">Painel</button>
+      <button role="tab" data-v="lote" aria-selected="false">Renovar em lote <span class="tbadge" id="bLote" hidden></span></button>
       <button role="tab" data-v="empresas" aria-selected="false">Empresas</button>
       <button role="tab" data-v="lancar" aria-selected="false">Lançar certidões</button>
       <button role="tab" data-v="perguntar" aria-selected="false" hidden>Perguntar à IA</button>
-      <button role="tab" data-v="dados" aria-selected="false">Importar e backup</button>
+      <button role="tab" data-v="relatorio" aria-selected="false">Relatórios</button>
+      <button role="tab" data-v="dados" aria-selected="false" id="tabDados" hidden>Importar e backup</button>
     </nav>
   </div>
 </header>
@@ -239,6 +268,47 @@ a.emit:hover{background:var(--accent);color:var(--accent-ink)}
     <div class="panel">
       <h3>Últimos lançamentos</h3>
       <div id="hist" class="small"></div>
+    </div>
+  </section>
+
+  <!-- LOTE -->
+  <section class="view" id="v-lote" hidden>
+    <div class="panel">
+      <div class="row"><h2 class="grow">Renovar em lote</h2><span class="small muted">Escolha uma certidão e renove de todas as empresas, uma atrás da outra.</span></div>
+      <div class="ltipos" id="lTipos"></div>
+    </div>
+    <div class="panel" id="lBox">
+      <div class="row">
+        <div class="grow"><h2 id="lTit"></h2><div class="prog" aria-hidden="true"><i id="lBar"></i></div><span class="small muted" id="lProg"></span></div>
+        <button class="btn pri" id="lNext">Emitir a próxima ▸</button>
+        <button class="btn" id="lCopy">Copiar lista</button>
+        <button class="btn" id="lRel">Relatório desta certidão</button>
+      </div>
+      <div class="row"><span class="small muted">Mostrar:</span><div class="chips" id="lEst"></div><input id="lBusca" placeholder="Filtrar empresa" aria-label="Filtrar empresa" style="flex:0 1 200px"></div>
+      <p class="note" id="lDica">Como funciona: clique em <b>Emitir a próxima</b>. O app copia o CNPJ (ou a inscrição municipal, no ISS) e abre o site do órgão; é só colar. A empresa fica marcada com ✓ e a próxima vez segue para a seguinte. Emitiu? Arraste os PDFs no quadro abaixo que o sistema lança sozinho.</p>
+      <div class="drop" id="lDrop">Arraste aqui os PDFs ou fotos das certidões que acabou de emitir, ou <button class="link" id="lPick">escolha os arquivos</button><input type="file" id="lFilesL" multiple accept="application/pdf,image/*" hidden></div>
+      <div class="scroll"><table class="lote"><thead><tr><th style="width:34px"></th><th>Empresa</th><th>CNPJ / Inscrição</th><th>Validade</th><th>Situação</th><th>Observação</th><th style="text-align:right">Ações</th></tr></thead><tbody id="lLista"></tbody></table></div>
+    </div>
+  </section>
+
+  <!-- RELATÓRIOS -->
+  <section class="view" id="v-relatorio" hidden>
+    <div class="panel">
+      <h2>Relatórios</h2>
+      <p class="muted small" style="margin:0">Relatório em PDF com o logo e as cores da Jopec, pronto para imprimir, enviar ao cliente ou arquivar. Na janela que abrir, escolha <b>Salvar como PDF</b>.</p>
+      <div class="rtipos" id="rTipos">
+        <button class="rtipo" data-r="acao" aria-pressed="true"><b>O que precisa de ação</b><span>Vencidas, para renovar, pendências e em andamento, separadas por certidão.</span></button>
+        <button class="rtipo" data-r="geral" aria-pressed="false"><b>Quadro geral</b><span>Todas as empresas × todas as certidões, com a validade de cada uma. Página deitada.</span></button>
+        <button class="rtipo" data-r="certidao" aria-pressed="false"><b>Por certidão</b><span>Uma certidão em todas as empresas, ordenada pelo vencimento.</span></button>
+        <button class="rtipo" data-r="empresa" aria-pressed="false"><b>Por empresa</b><span>Ficha de uma empresa com todas as certidões. Ideal para mandar ao cliente.</span></button>
+      </div>
+      <div class="formgrid">
+        <label class="f" id="rCertBox" hidden>Certidão<select id="rCert"></select></label>
+        <label class="f" id="rEmpBox" hidden>Empresa<select id="rEmp"></select></label>
+      </div>
+      <label class="row small"><input type="checkbox" id="rObs"> Incluir observações internas (anotações do controle)</label>
+      <label class="row small"><input type="checkbox" id="rVelhas"> Ocultar certidões vencidas há mais de 1 ano (provavelmente não acompanhadas)</label>
+      <div class="row"><button class="btn pri" id="rPdf">Gerar PDF</button><button class="btn" id="rCsv">Baixar planilha (Excel)</button></div>
     </div>
   </section>
 
@@ -398,18 +468,18 @@ function ativos(){return EMP.filter(e=>st.arq||e.ativo!==false).sort((a,b)=>a.no
 /* ---------- ui util ---------- */
 let tt;function toast(m){const t=$('#toast');t.textContent=m;t.hidden=false;clearTimeout(tt);tt=setTimeout(()=>t.hidden=true,3500);}
 function pill(est,txt){return '<span class="pill s-'+est+'">'+esc(txt||EST[est])+'</span>';}
-function view(v){document.querySelectorAll('#tabs button').forEach(b=>b.setAttribute('aria-selected',b.dataset.v===v));document.querySelectorAll('section.view').forEach(s=>s.hidden=s.id!=='v-'+v);if(v==='painel')requestAnimationFrame(desenhar);if(location.hash!=='#'+v)history.replaceState(null,'','#'+v);}
+function view(v){if(v==='dados'&&!isAdmin)v='painel';document.querySelectorAll('#tabs button').forEach(b=>b.setAttribute('aria-selected',b.dataset.v===v));document.querySelectorAll('section.view').forEach(s=>s.hidden=s.id!=='v-'+v);if(v==='painel')requestAnimationFrame(desenhar);if(location.hash!=='#'+v)history.replaceState(null,'','#'+v);}
 $('#tabs').onclick=e=>{const b=e.target.closest('button');if(b)view(b.dataset.v);};
 addEventListener('hashchange',()=>{const v=location.hash.slice(1);if(document.getElementById('v-'+v))view(v);});
 
 /* ---------- render ---------- */
-function render(){renderPainel();renderGrid();renderSelects();}
+function render(){renderPainel();renderGrid();renderSelects();renderLote();renderRelForm();}
 function linhas(){const out=[];ativos().forEach(e=>{if(e.ativo===false)return;TIPOS.forEach(t=>{const i=info(e,t.k);if(i.est==='sem'||i.est==='ok'||i.est==='subst')return;out.push({e,t,i});});});return out;}
 function renderPainel(){
   requestAnimationFrame(desenhar);
   const L=linhas();const cnt={venc:0,renovar:0,atencao:0,pend:0,and:0};L.forEach(x=>cnt[x.i.est]++);
   $('#kpis').innerHTML=[['renovar','Renovar agora'],['venc','Vencidas'],['atencao','Vencem em 30 dias'],['pend','Pendências'],['and','Em andamento']].map(([k,l])=>'<button class="kpi" data-k="'+k+'" aria-pressed="'+(st.kpi===k)+'"><b class="mono">'+cnt[k]+'</b><span>'+l+'</span></button>').join('');
-  $('#filaTipos').innerHTML='<button class="chip" data-t="" aria-pressed="'+(!st.tipo)+'">Todas</button>'+TIPOS.map(t=>'<button class="chip" data-t="'+t.k+'" aria-pressed="'+(st.tipo===t.k)+'">'+t.a+'</button>').join('');
+  $('#filaTipos').innerHTML='<button class="chip" data-t="" aria-pressed="'+(!st.tipo)+'">Todas</button>'+TIPOS.filter(t=>!t.legado).map(t=>'<button class="chip" data-t="'+t.k+'" title="'+esc(t.n)+'" aria-pressed="'+(st.tipo===t.k)+'">'+t.a+'</button>').join('');
   const ord={renovar:0,venc:1,pend:2,and:3,atencao:4};
   let F=L.filter(x=>(!st.kpi||x.i.est===st.kpi)&&(!st.tipo||x.t.k===st.tipo)&&(!st.fbusca||x.e.nome.toLowerCase().includes(st.fbusca)));
   F.sort((a,b)=>ord[a.i.est]-ord[b.i.est]||((a.i.val||'9')<(b.i.val||'9')?-1:1));
@@ -502,9 +572,9 @@ function abrirEmpresa(id){
   const kv=[['Razão social',e.razao],['CNPJ',e.cnpj],['Inscrição municipal',e.im],['Inscrição estadual',e.ie],['Natureza / registro',e.natureza],['Simples Nacional',e.simples===true?'Sim':e.simples===false?'Não':''],['Nome fantasia',e.fantasia],['Endereço',[e.endereco,e.bairro,e.cidade,e.uf,e.cep].filter(Boolean).join(', ')],['Telefone',e.tel],['E-mail',e.email],['Observações',e.obs]];
   abrir(e.nome,'<div class="kv">'+kv.map(([k,v])=>'<div><span>'+k+'</span>'+(v?esc(v):'<span class="muted" style="text-transform:none;letter-spacing:0">—</span>')+'</div>').join('')+'</div>'+
    '<div class="scroll"><table><thead><tr><th>Certidão</th><th>Emissão</th><th>Validade</th><th>Situação</th></tr></thead><tbody>'+TIPOS.map(t=>{const i=info(e,t.k);return '<tr data-t="'+t.k+'" style="cursor:pointer"><td>'+esc(t.n)+'</td><td class="mono">'+br(i.c.emissao)+'</td><td class="mono">'+br(i.val)+(i.manual?' *':'')+'</td><td>'+pill(i.est,i.c.status||EST[i.est])+'</td></tr>';}).join('')+'</tbody></table></div>',
-   '<button class="btn danger" id="eArq">'+(e.ativo===false?'Reativar':'Arquivar (não é mais cliente)')+'</button><button class="btn pri" id="eEd">Editar cadastro</button>');
+   '<button class="btn" id="eRel">Relatório da empresa</button><button class="btn danger" id="eArq">'+(e.ativo===false?'Reativar':'Arquivar (não é mais cliente)')+'</button><button class="btn pri" id="eEd">Editar cadastro</button>');
   $('#dB').querySelector('tbody').onclick=ev=>{const r=ev.target.closest('tr[data-t]');if(r){dlg.close();editCert(id,r.dataset.t);}};
-  $('#eEd').onclick=()=>formEmpresa(e);
+  $('#eEd').onclick=()=>formEmpresa(e);$('#eRel').onclick=()=>gerarRelatorio('empresa',{id:e.id});
   $('#eArq').onclick=async()=>{await salvarEmp(e.id,{ativo:e.ativo===false},e.ativo===false?'empresa reativada':'empresa arquivada');dlg.close();};
 }
 const CAMPOS=[['nome','Nome curto'],['razao','Razão social'],['fantasia','Nome fantasia'],['cnpj','CNPJ'],['im','Inscrição municipal'],['ie','Inscrição estadual'],['natureza','Natureza / registro (JUCERJA ou RCPJ)'],['cep','CEP'],['endereco','Endereço'],['bairro','Bairro'],['cidade','Cidade'],['uf','UF'],['tel','Telefone'],['email','E-mail'],['obs','Observações']];
@@ -851,6 +921,122 @@ $('#bCsv').onclick=()=>{const q=v=>'"'+String(v??'').replace(/"/g,'""')+'"';cons
   ativos().forEach(e=>TIPOS.forEach(t=>{const i=info(e,t.k);if(i.est==='sem'&&!i.c.obs)return;L.push([e.nome,e.cnpj,t.n,br(i.c.emissao),br(i.val),EST[i.est],i.c.status,i.c.obs].map(q).join(';'));}));
   baixar('certidoes-jopec-'+hojeISO()+'.csv','﻿'+L.join('\n'));};
 
+
+/* ---------- papéis ---------- */
+const ADMINS=['mateus.jopec@gmail.com'];let isAdmin=false,userEmail='';
+function aplicarPapel(email){userEmail=(email||'').toLowerCase();isAdmin=ADMINS.includes(userEmail);$('#tabDados').hidden=!isAdmin;if(!isAdmin&&!$('#v-dados').hidden)view('painel');}
+
+/* ---------- renovar em lote ---------- */
+const PRI={renovar:0,venc:1,pend:2,and:3,atencao:4,ok:5,sem:6,subst:7};
+function infoLote(e,k){const i=info(e,k);if(k!=='EST'||i.est!=='sem')return i;
+  const a=info(e,'SEFAZ'),b=info(e,'PGE');const v=[a,b].filter(x=>x.est!=='subst'&&x.est!=='sem').sort((x,y)=>PRI[x.est]-PRI[y.est])[0];return v?Object.assign({},v,{legado:true}):i;}
+let LT=null;try{LT=localStorage.getItem('loteTipo');}catch(e){}
+const LE0=['venc','renovar','pend'];let LE=new Set(LE0);const FEITO=new Set();let lAtual=null;
+const LOTE_TIPOS=()=>TIPOS.filter(t=>!t.legado);
+function lLinhas(k){const q=($('#lBusca').value||'').toLowerCase();
+  return EMP.filter(e=>e.ativo!==false).map(e=>({e,i:infoLote(e,k)})).filter(x=>(LE.has(x.i.est)||(LE.has('sem')&&x.i.est==='sem'))&&(!q||x.e.nome.toLowerCase().includes(q)))
+   .sort(ordAcao);}
+function ordAcao(a,b){return PRI[a.i.est]-PRI[b.i.est]||(a.i.est==='venc'?((a.i.val||'0')>(b.i.val||'0')?-1:(a.i.val||'0')<(b.i.val||'0')?1:0):((a.i.val||'9')<(b.i.val||'9')?-1:(a.i.val||'9')>(b.i.val||'9')?1:0))||a.e.nome.localeCompare(b.e.nome,'pt');}
+function renderLote(){
+  const T=LOTE_TIPOS();if(!LT||!TK[LT]||TK[LT].legado)LT=T[0].k;
+  const act=EMP.filter(e=>e.ativo!==false);
+  const cont=T.map(t=>{let n=0,a=0;act.forEach(e=>{const s=infoLote(e,t.k).est;if(s==='venc'||s==='renovar'||s==='pend')n++;if(s==='and')a++;});return {t,n,a};});
+  cont.sort((x,y)=>y.n-x.n);
+  $('#lTipos').innerHTML=cont.map(c=>'<button class="ltipo" data-t="'+c.t.k+'" aria-pressed="'+(LT===c.t.k)+'"><b class="mono'+(c.n?'':' zero')+'">'+c.n+'</b><span>'+esc(c.t.n)+'</span><small>'+(c.n?'para emitir':'tudo em dia')+(c.a?' · '+c.a+' pedidas':'')+'</small></button>').join('');
+  const tot=cont.reduce((a,c)=>a+c.n,0);const bl=$('#bLote');bl.hidden=!tot;bl.textContent=tot;
+  try{document.title=(tot?'('+tot+') ':'')+'Certidões Jopec';if(navigator.setAppBadge)tot?navigator.setAppBadge(tot):navigator.clearAppBadge();}catch(e){}
+  const t=TK[LT];$('#lTit').textContent=t.n;
+  $('#lEst').innerHTML=[['venc','Vencidas'],['renovar','Renovar agora'],['pend','Pendências'],['and','Em andamento'],['atencao','Vencem em 30 dias'],['ok','Válidas'],['sem','Sem lançamento']].map(([k,l])=>'<button class="chip" data-k="'+k+'" aria-pressed="'+LE.has(k)+'">'+l+'</button>').join('');
+  const L=lLinhas(LT);const feitos=L.filter(x=>FEITO.has(LT+'|'+x.e.id)).length;
+  $('#lProg').textContent=L.length?feitos+' de '+L.length+' já abertas nesta sessão':'';$('#lBar').style.width=L.length?(feitos*100/L.length)+'%':'0';
+  $('#lNext').disabled=!L.length||!LINKS[LT];$('#lNext').textContent=!LINKS[LT]?'Sem site cadastrado':feitos&&feitos===L.length?'Recomeçar do início ▸':'Emitir a próxima ▸';
+  const lab=LT==='ISS'?'IM ':'';
+  $('#lLista').innerHTML=!dbOk?'<tr><td colspan="7" class="empty">Carregando…</td></tr>':!L.length?'<tr><td colspan="7" class="empty">Nenhuma empresa nesta seleção. Tudo em dia com '+esc(t.a)+'.</td></tr>':L.map(x=>{const ch=chaveDe(x.e,LT);const f=FEITO.has(LT+'|'+x.e.id);const n=x.i.n;const d=n===null?'':(n<0?' · venceu há '+(-n)+'d':' · '+n+'d');
+    return '<tr data-e="'+esc(x.e.id)+'" class="'+(f?'feito':'')+(lAtual===x.e.id?' atual':'')+'" style="--sev:var(--'+({venc:'bad',renovar:'warn',pend:'pend',and:'info',atencao:'warn',ok:'ok',sem:'none'}[x.i.est]||'none')+')"><td class="chk">'+(f?'✓':'')+'</td><td class="name"><button data-emp="'+esc(x.e.id)+'">'+esc(x.e.nome)+'</button></td><td>'+(ch?'<button class="chave" data-copy="'+esc(ch)+'" title="Copiar">'+lab+esc(fmtDoc(ch))+'</button>':'<span class="muted small">'+(LT==='ISS'?'sem inscrição municipal':'sem CNPJ')+'</span>')+'</td><td class="mono">'+br(x.i.val)+(x.i.legado?' <span class="muted small">(antiga)</span>':'')+'</td><td>'+pill(x.i.est,EST[x.i.est]+d)+'</td><td class="small muted obs"><div class="clamp" title="'+esc([x.i.c.status,x.i.c.obs].filter(Boolean).join(' · '))+'">'+esc([x.i.c.status,x.i.c.obs].filter(Boolean).join(' · ').slice(0,200))+'</div></td><td><div class="acts">'+(LINKS[LT]?'<button class="mini" data-a="emitir">Emitir</button>':'')+(x.i.est!=='and'?'<button class="mini" data-a="pedida" title="Marcar como solicitada (protocolo / aguardando)">Pedida</button>':'')+'<button class="mini" data-a="lancar">Lançar</button></div></td></tr>';}).join('');
+}
+function fmtDoc(d){d=String(d||'');if(d.length===14)return d.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/,'$1.$2.$3/$4-$5');return d;}
+function abrirSite(e){const ch=chaveDe(e,LT);if(ch)copiar(ch);FEITO.add(LT+'|'+e.id);lAtual=e.id;window.open(LINKS[LT],'emissao_'+LT);renderLote();
+  const r=document.querySelector('#lLista tr[data-e="'+CSS.escape(e.id)+'"]');r&&r.scrollIntoView({block:'center',behavior:'smooth'});}
+$('#lTipos').onclick=e=>{const b=e.target.closest('.ltipo');if(!b)return;LT=b.dataset.t;lAtual=null;try{localStorage.setItem('loteTipo',LT);}catch(x){}renderLote();};
+$('#lEst').onclick=e=>{const b=e.target.closest('.chip');if(!b)return;const k=b.dataset.k;LE.has(k)?LE.delete(k):LE.add(k);if(!LE.size)LE=new Set(LE0);renderLote();};
+$('#lBusca').oninput=()=>renderLote();
+$('#lNext').onclick=()=>{let L=lLinhas(LT);if(!L.length)return;let x=L.find(x=>!FEITO.has(LT+'|'+x.e.id));if(!x){L.forEach(y=>FEITO.delete(LT+'|'+y.e.id));x=L[0];}abrirSite(x.e);};
+$('#lCopy').onclick=()=>{const L=lLinhas(LT);if(!L.length)return toast('Lista vazia.');copiar(L.map(x=>x.e.nome+' — '+(fmtDoc(chaveDe(x.e,LT))||'sem '+(LT==='ISS'?'inscrição':'CNPJ'))+' — '+EST[x.i.est]).join('\n'));};
+$('#lRel').onclick=()=>gerarRelatorio('certidao',{k:LT});
+$('#lLista').onclick=async e=>{const n=e.target.closest('[data-emp]');if(n)return abrirEmpresa(n.dataset.emp);const b=e.target.closest('[data-a]');if(!b)return;const id=b.closest('tr').dataset.e;const em=emp(id);
+  if(b.dataset.a==='emitir')abrirSite(em);
+  else if(b.dataset.a==='lancar')editCert(id,LT);
+  else if(b.dataset.a==='pedida'){const old=(em.certs||{})[LT]||{};b.disabled=true;await salvarCert(id,LT,{emissao:old.emissao||null,validade:old.validade||null,status:'SOLICITADA em '+br(hojeISO()),obs:old.obs||''});}};
+$('#lPick').onclick=()=>$('#lFilesL').click();
+$('#lFilesL').onchange=e=>{const f=[...e.target.files];e.target.value='';view('lancar');anexarCertidoes(f);};
+{const d=$('#lDrop');d.ondragover=e=>{e.preventDefault();d.classList.add('over');};d.ondragleave=()=>d.classList.remove('over');d.ondrop=e=>{e.preventDefault();d.classList.remove('over');const f=[...e.dataTransfer.files].filter(f=>/pdf|image/.test(f.type));view('lancar');anexarCertidoes(f);};}
+
+/* ---------- relatórios ---------- */
+let RT='acao';const LOGO={};['logo-mark.png','logo-jopec.png'].forEach(f=>fetch(f).then(r=>r.blob()).then(b=>{const fr=new FileReader();fr.onload=()=>LOGO[f]=fr.result;fr.readAsDataURL(b);}).catch(()=>{}));
+function renderRelForm(){
+  if(!$('#rCert').options.length)$('#rCert').innerHTML=LOTE_TIPOS().map(t=>'<option value="'+t.k+'">'+esc(t.n)+'</option>').join('');
+  const cur=$('#rEmp').value;$('#rEmp').innerHTML=EMP.filter(e=>e.ativo!==false).sort((a,b)=>a.nome.localeCompare(b.nome,'pt')).map(e=>'<option value="'+esc(e.id)+'">'+esc(e.nome)+'</option>').join('');if(cur)$('#rEmp').value=cur;
+  $('#rCertBox').hidden=RT!=='certidao';$('#rEmpBox').hidden=RT!=='empresa';
+  document.querySelectorAll('#rTipos .rtipo').forEach(b=>b.setAttribute('aria-pressed',b.dataset.r===RT));}
+$('#rTipos').onclick=e=>{const b=e.target.closest('.rtipo');if(!b)return;RT=b.dataset.r;renderRelForm();};
+$('#rPdf').onclick=()=>gerarRelatorio(RT,{k:$('#rCert').value,id:$('#rEmp').value,obs:$('#rObs').checked,velhas:$('#rVelhas').checked});
+$('#rCsv').onclick=()=>{const d=dadosRel(RT,{k:$('#rCert').value,id:$('#rEmp').value,velhas:$('#rVelhas').checked});const q=v=>'"'+String(v??'').replace(/"/g,'""')+'"';
+  const L=[['Empresa','CNPJ','Inscrição municipal','Certidão','Emissão','Validade','Dias','Situação','Status','Observação'].map(q).join(';')].concat(d.linhas.map(x=>[x.e.nome,fmtDoc(x.e.cnpj),x.e.im,x.t.n,br(x.i.c.emissao),br(x.i.val),x.i.n??'',EST[x.i.est],x.i.c.status,$('#rObs').checked?x.i.c.obs:''].map(q).join(';')));
+  baixar('relatorio-certidoes-'+RT+'-'+hojeISO()+'.csv','﻿'+L.join('\n'));};
+function dadosRel(tipo,o){const act=EMP.filter(e=>e.ativo!==false).sort((a,b)=>a.nome.localeCompare(b.nome,'pt'));const T=LOTE_TIPOS();let linhas=[];
+  if(tipo==='acao')T.forEach(t=>act.forEach(e=>{const i=infoLote(e,t.k);if(['venc','renovar','pend','and'].includes(i.est)&&!(o.velhas&&i.est==='venc'&&i.n<-365))linhas.push({e,t,i});}));
+  else if(tipo==='certidao'){const t=TK[o.k];act.forEach(e=>linhas.push({e,t,i:infoLote(e,t.k)}));linhas.sort((a,b)=>(a.i.val||'9')<(b.i.val||'9')?-1:(a.i.val||'9')>(b.i.val||'9')?1:a.e.nome.localeCompare(b.e.nome,'pt'));}
+  else if(tipo==='empresa'){const e=emp(o.id);if(e)TIPOS.forEach(t=>{const i=info(e,t.k);if(t.legado&&(i.est==='subst'||i.est==='sem'))return;linhas.push({e,t,i});});}
+  else act.forEach(e=>T.forEach(t=>linhas.push({e,t,i:infoLote(e,t.k)})));
+  return {act,T,linhas};}
+function gerarRelatorio(tipo,o){o=o||{};const d=dadosRel(tipo,o);const now=new Date();const H=s=>esc(s);
+  const base=new URL('.',location.href).href;
+  const quando=br(hojeISO())+' às '+String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
+  const cor={venc:'#b3261e',renovar:'#a15c00',atencao:'#8a6d00',pend:'#8a4b00',and:'#1d5fa8',ok:'#1f7a4a',sem:'#7d8a86',subst:'#7d8a86'};
+  const bg={venc:'#fbdcd8',renovar:'#fdecc8',atencao:'#fff4cf',pend:'#f6e0c7',and:'#dbe8f8',ok:'#dff1e6',sem:'#f1f2f2',subst:'#f1f2f2'};
+  const pl=(est,txt)=>'<span class="pl" style="color:'+cor[est]+';background:'+bg[est]+'">'+H(txt||EST[est])+'</span>';
+  const obsTxt=i=>o.obs?H([i.c.status,i.c.obs].filter(Boolean).join(' · ')):H(i.c.status||'');
+  // resumo
+  const base2=tipo==='empresa'?d.linhas:d.act.flatMap(e=>LOTE_TIPOS().map(t=>({e,t,i:infoLote(e,t.k)})));
+  const c={venc:0,renovar:0,atencao:0,pend:0,and:0,ok:0,sem:0};base2.forEach(x=>{if(c[x.i.est]!==undefined)c[x.i.est]++;});
+  const cons=c.ok+c.atencao+c.and+c.venc+c.renovar+c.pend;const pct=cons?Math.round((c.ok+c.atencao+c.and)*100/cons):0;
+  const kpis=[[tipo==='empresa'?'Certidões':'Empresas',tipo==='empresa'?d.linhas.length:d.act.length,'#231a1b'],['Em dia',pct+'%','#1f7a4a'],['Vencidas',c.venc,cor.venc],['Renovar agora',c.renovar,cor.renovar],['Pendências',c.pend,cor.pend],['Em andamento',c.and,cor.and]];
+  let titulo,sub='',corpo='',land=false;
+  if(tipo==='acao'){titulo='Certidões que precisam de ação';sub='Vencidas, a renovar, com pendência e em andamento, por certidão';
+    const g=LOTE_TIPOS().map(t=>({t,L:d.linhas.filter(x=>x.t.k===t.k).sort(ordAcao)})).filter(g=>g.L.length);
+    corpo=g.length?g.map(g=>'<h3 class="sec"><span>'+H(g.t.n)+'</span><em>'+g.L.length+(g.L.length>1?' empresas':' empresa')+'</em></h3><table class="t"><thead><tr><th style="width:30%">Empresa</th><th style="width:22%">'+(g.t.k==='ISS'?'Inscrição municipal':'CNPJ')+'</th><th style="width:12%">Validade</th><th style="width:19%">Situação</th><th>'+(o.obs?'Status / observação':'Status')+'</th></tr></thead><tbody>'+g.L.map(x=>'<tr><td><b>'+H(x.e.nome)+'</b></td><td class="m">'+H(fmtDoc(chaveDe(x.e,g.t.k))||'—')+'</td><td class="m">'+br(x.i.val)+'</td><td>'+pl(x.i.est,EST[x.i.est]+(x.i.n!==null&&x.i.n<0?' há '+(-x.i.n)+'d':''))+'</td><td class="o">'+obsTxt(x.i)+'</td></tr>').join('')+'</tbody></table>').join(''):'<p class="vazio">Nenhuma certidão precisando de ação. Tudo em dia.</p>';}
+  else if(tipo==='certidao'){const t=TK[o.k];titulo=t.n;sub='Situação em todas as empresas ativas, ordenada pelo vencimento · validade padrão de '+t.prazo+' dias';
+    corpo='<table class="t"><thead><tr><th style="width:26%">Empresa</th><th style="width:21%">'+(t.k==='ISS'?'Inscrição municipal':'CNPJ')+'</th><th style="width:11%">Emissão</th><th style="width:11%">Validade</th><th style="width:16%">Situação</th><th>'+(o.obs?'Status / observação':'Status')+'</th></tr></thead><tbody>'+d.linhas.map(x=>'<tr><td><b>'+H(x.e.nome)+'</b></td><td class="m">'+H(fmtDoc(chaveDe(x.e,t.k))||'—')+'</td><td class="m">'+br(x.i.c.emissao)+'</td><td class="m">'+br(x.i.val)+'</td><td>'+pl(x.i.est,EST[x.i.est]+(x.i.n!==null&&x.i.est!=='sem'?(x.i.n<0?' há '+(-x.i.n)+'d':' · '+x.i.n+'d'):''))+'</td><td class="o">'+obsTxt(x.i)+'</td></tr>').join('')+'</tbody></table>';}
+  else if(tipo==='empresa'){const e=emp(o.id);if(!e)return toast('Escolha a empresa.');titulo=e.razao||e.nome;sub='Ficha de certidões negativas';
+    const kv=[['CNPJ',fmtDoc(e.cnpj)],['Inscrição municipal',e.im],['Inscrição estadual',e.ie],['Simples Nacional',e.simples===true?'Sim':e.simples===false?'Não':''],['Natureza / registro',e.natureza],['Endereço',[e.endereco,e.bairro,e.cidade,e.uf,e.cep].filter(Boolean).join(', ')]].filter(x=>x[1]);
+    corpo='<div class="ficha">'+kv.map(([k,v])=>'<div><span>'+k+'</span>'+H(v)+'</div>').join('')+'</div><table class="t"><thead><tr><th style="width:36%">Certidão</th><th style="width:13%">Emissão</th><th style="width:13%">Validade</th><th style="width:18%">Situação</th><th>'+(o.obs?'Status / observação':'Status')+'</th></tr></thead><tbody>'+d.linhas.map(x=>'<tr><td><b>'+H(x.t.n)+'</b></td><td class="m">'+br(x.i.c.emissao)+'</td><td class="m">'+br(x.i.val)+'</td><td>'+pl(x.i.est)+'</td><td class="o">'+obsTxt(x.i)+'</td></tr>').join('')+'</tbody></table>';}
+  else{land=true;titulo='Quadro geral de certidões';sub='Validade de cada certidão por empresa ativa';
+    corpo='<table class="t q"><thead><tr><th class="qe">Empresa</th>'+d.T.map(t=>'<th>'+H(t.a)+'</th>').join('')+'</tr></thead><tbody>'+d.act.map(e=>'<tr><td class="qe"><b>'+H(e.nome)+'</b></td>'+d.T.map(t=>{const i=infoLote(e,t.k);return '<td><span class="qc" style="color:'+cor[i.est]+';background:'+bg[i.est]+'">'+(i.val?br(i.val).slice(0,6)+br(i.val).slice(8):(i.est==='and'?'pedida':i.est==='pend'?'pend.':'—'))+'</span></td>';}).join('')+'</tr>').join('')+'</tbody></table><p class="leg">'+['ok','atencao','renovar','venc','pend','and','sem'].map(k=>pl(k)).join(' ')+'</p>';}
+  const html='<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><base href="'+base+'"><title>'+H(titulo)+' — Jopec Legalização '+hojeISO()+'</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap"><style>'+
+  '@page{size:A4 '+(land?'landscape':'portrait')+';margin:12mm 11mm 16mm;@bottom-left{content:"Jopec · Setor de Legalização · Responsável: Mateus Lima Miguel";font:8pt "Plus Jakarta Sans",sans-serif;color:#6b6162}@bottom-right{content:"Página " counter(page) " de " counter(pages);font:8pt "Plus Jakarta Sans",sans-serif;color:#6b6162}}'+
+  '*{box-sizing:border-box;-webkit-print-color-adjust:exact;print-color-adjust:exact}body{margin:0;font:9.5pt/1.4 "Plus Jakarta Sans",system-ui,sans-serif;color:#231a1b;background:#fff}'+
+  '.cab{background:linear-gradient(120deg,#a23133,#741f22);color:#fff;border-radius:10px;padding:14px 18px;display:flex;align-items:center;gap:16px}.cab .lg{display:flex;align-items:center;gap:10px}.cab .lg img.m{height:42px}.cab .lg img.w{height:30px;display:block}.cab .lg small{display:block;font-size:8pt;opacity:.85;margin-top:2px;letter-spacing:.04em}'+
+  '.cab .tt{margin-left:auto;text-align:right}.cab .tt em{font-style:normal;font-size:7.5pt;letter-spacing:.14em;text-transform:uppercase;opacity:.8}.cab .tt h1{font:800 17pt/1.1 "Bricolage Grotesque",sans-serif;margin:2px 0 0;letter-spacing:-.01em}'+
+  '.meta{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:10px 2px 12px;font-size:8.5pt;color:#6b6162;border-bottom:2px solid #a23133;padding-bottom:8px}.meta b{color:#231a1b}'+
+  '.kp{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin-bottom:14px}.kp div{border:1px solid #e6dede;border-radius:8px;padding:8px 10px;background:linear-gradient(135deg,#fff,#f8f1f1)}.kp b{display:block;font:800 16pt/1 "Bricolage Grotesque",sans-serif}.kp span{font-size:7.5pt;color:#6b6162;text-transform:uppercase;letter-spacing:.06em}'+
+  'h3.sec{display:flex;align-items:baseline;gap:10px;font:700 11.5pt "Bricolage Grotesque",sans-serif;margin:16px 0 6px;padding:5px 10px;border-left:4px solid #a23133;background:linear-gradient(90deg,#f6e3e3,#fff);break-after:avoid}h3.sec em{font:600 8pt "Plus Jakarta Sans",sans-serif;font-style:normal;color:#6b6162;margin-left:auto}'+
+  'table.t{width:100%;border-collapse:collapse;table-layout:fixed}table.t th{font-size:7.5pt;text-transform:uppercase;letter-spacing:.06em;color:#5a4f50;text-align:left;padding:6px 7px;background:#efe7e7;border-bottom:1.5px solid #a23133}table.t td{padding:5px 7px;vertical-align:middle;border-bottom:1px solid #eadfdf;word-wrap:break-word}'+
+  'table.t tbody tr:nth-child(odd) td{background:linear-gradient(90deg,#f8ecec,#fff)}table.t tr{break-inside:avoid}thead{display:table-header-group}td.m{font:500 8pt "JetBrains Mono",monospace;white-space:nowrap}td.o{font-size:8pt;color:#5a4f50}'+
+  '.pl{display:inline-block;border-radius:99px;padding:1.5px 7px;font-weight:700;font-size:7.8pt;white-space:nowrap}'+
+  'table.q{font-size:7.6pt}table.q th{text-align:center;padding:5px 2px;font-size:6.8pt}table.q th.qe,table.q td.qe{text-align:left;width:19%}table.q td{padding:2.5px 2px;text-align:center}.qc{display:block;border-radius:4px;padding:2px 0;font:600 7pt "JetBrains Mono",monospace}'+
+  '.ficha{display:grid;grid-template-columns:repeat(3,1fr);gap:8px 16px;margin-bottom:14px;padding:10px 12px;border:1px solid #e6dede;border-radius:8px}.ficha span{display:block;font-size:7pt;text-transform:uppercase;letter-spacing:.07em;color:#6b6162}'+
+  '.leg{margin-top:10px;font-size:7.5pt}.vazio{padding:30px;text-align:center;color:#6b6162}.ass{margin-top:22px;display:flex;justify-content:space-between;align-items:flex-end;font-size:8pt;color:#6b6162;break-inside:avoid}.ass div{border-top:1px solid #231a1b;padding-top:4px;min-width:230px;text-align:center;color:#231a1b}'+
+  '.bar{position:sticky;top:0;background:#231a1b;color:#fff;padding:10px 16px;display:flex;gap:10px;align-items:center;font-size:10pt;margin:-8px -8px 12px}.bar button{font:700 10pt "Plus Jakarta Sans",sans-serif;background:#a23133;color:#fff;border:0;border-radius:8px;padding:8px 14px;cursor:pointer}@media print{.bar{display:none}}@media screen{body{padding:8px;max-width:'+(land?'1120':'800')+'px;margin:0 auto}}'+
+  '</style></head><body><div class="bar"><span style="flex:1">Pré-visualização do relatório. Para salvar, clique em Salvar PDF e escolha “Salvar como PDF”.</span><button onclick="print()">Salvar PDF / Imprimir</button></div>'+
+  '<div class="cab"><div class="lg"><img class="m" src="'+(LOGO['logo-mark.png']||base+'logo-mark.png')+'" alt=""><div><img class="w" src="'+(LOGO['logo-jopec.png']||base+'logo-jopec.png')+'" alt="Jopec"><small>SETOR DE LEGALIZAÇÃO</small></div></div><div class="tt"><em>Relatório de certidões</em><h1>'+H(titulo)+'</h1></div></div>'+
+  '<div class="meta"><span>'+H(sub)+'</span><span>Responsável: <b>Mateus Lima Miguel</b> · Gerado em <b>'+quando+'</b></span></div>'+
+  '<div class="kp">'+kpis.map(([l,v,c])=>'<div><b style="color:'+c+'">'+v+'</b><span>'+l+'</span></div>').join('')+'</div>'+corpo+
+  '<div class="ass"><span>Situação calculada pelas datas de emissão e validade registradas no controle em '+br(hojeISO())+'.<br>Certidões vencidas devem ser renovadas antes de qualquer protocolo.</span><div>Mateus Lima Miguel<br><small style="color:#6b6162">Setor de Legalização · Jopec</small></div></div>'+
+  '<script>document.fonts.ready.then(()=>{const ims=[...document.images];Promise.all(ims.map(i=>i.complete?1:new Promise(r=>{i.onload=i.onerror=r}))).then(()=>setTimeout(()=>print(),350))});<\/script></body></html>';
+  const w=window.open('','_blank');if(!w){toast('O navegador bloqueou a janela. Permita pop-ups para este site.');return;}
+  w.document.open();w.document.write(html);w.document.close();}
+
+addEventListener('keydown',e=>{if(e.key==='/'&&!/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName)&&!dlg.open){const v=document.querySelector('section.view:not([hidden])');const i=v&&v.querySelector('input[placeholder]');if(i){e.preventDefault();i.focus();}}});
 /* ---------- boot ---------- */
 render();
 const v0=location.hash.slice(1);if(document.getElementById('v-'+v0))view(v0);
@@ -863,7 +1049,7 @@ let rt;function aoVivo(){if(rt)return;rt=sb.channel('mud').on('postgres_changes'
 function telaLogin(on){$('#login').hidden=!on;document.querySelector('main').hidden=on;$('#tabs').hidden=on;}
 $('#lgForm').onsubmit=async ev=>{ev.preventDefault();$('#lgMsg').textContent='Entrando…';const {error}=await sb.auth.signInWithPassword({email:$('#lgEmail').value.trim(),password:$('#lgPass').value});$('#lgMsg').textContent=error?'E-mail ou senha incorretos.':'';};
 $('#sair').onclick=()=>sb.auth.signOut();
-sb.auth.onAuthStateChange((ev,ses)=>{if(ses){telaLogin(false);$('#sair').hidden=false;if(!dbOk){carregar();aoVivo();}}else{telaLogin(true);$('#sair').hidden=true;dbOk=false;EMP=[];}});
+sb.auth.onAuthStateChange((ev,ses)=>{if(ses){aplicarPapel(ses.user&&ses.user.email);telaLogin(false);$('#sair').hidden=false;if(!dbOk){carregar();aoVivo();}}else{telaLogin(true);$('#sair').hidden=true;dbOk=false;EMP=[];}});
 if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
 </script>
 
