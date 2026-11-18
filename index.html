@@ -88,6 +88,7 @@ input,select,textarea{font:inherit;color:var(--ink);background:var(--bg);border:
 textarea{width:100%;min-height:110px;resize:vertical}
 label.f{display:flex;flex-direction:column;gap:4px;font-size:13px;color:var(--muted)}
 label.f > *{color:var(--ink)}
+a.btn{display:inline-flex;align-items:center;text-decoration:none;font:600 15px var(--f-body);border-radius:10px;padding:10px 16px;border:1px solid var(--line);background:var(--surface);color:var(--ink)}a.btn.pri{background:linear-gradient(135deg,var(--accent),color-mix(in srgb,var(--accent) 75%,#000));border-color:var(--accent);color:var(--accent-ink);box-shadow:0 4px 12px -6px var(--accent)}
 button.btn{font:600 14px var(--f-body);border-radius:8px;padding:8px 14px;cursor:pointer;border:1px solid var(--line);background:var(--surface);color:var(--ink)}
 button.btn.pri{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
 button.btn.danger{color:var(--bad);border-color:var(--bad)}
@@ -108,7 +109,7 @@ td.name button{all:unset;cursor:pointer}
 td.name button:hover{text-decoration:underline}
 .pill{display:inline-flex;align-items:center;gap:6px;font:600 12px var(--f-body);border-radius:999px;padding:3px 9px;white-space:nowrap}
 .s-ok{background:var(--ok-bg);color:var(--ok)} .s-atencao{background:var(--warn-bg);color:var(--warn)} .s-renovar{background:var(--warn-bg);color:var(--warn)}
-.s-venc{background:var(--bad-bg);color:var(--bad)} .s-pend{background:var(--pend-bg);color:var(--pend)} .s-and{background:var(--info-bg);color:var(--info)} .s-sem,.s-subst{background:var(--none-bg);color:var(--none)}
+.s-na{background:transparent;color:var(--muted);font-style:italic;box-shadow:inset 0 0 0 1px dashed var(--line)}.s-venc{background:var(--bad-bg);color:var(--bad)} .s-pend{background:var(--pend-bg);color:var(--pend)} .s-and{background:var(--info-bg);color:var(--info)} .s-sem,.s-subst{background:var(--none-bg);color:var(--none)}
 .grid td.c{padding:4px;text-align:center}
 .cell{all:unset;box-sizing:border-box;cursor:pointer;display:block;min-width:58px;border-radius:6px;padding:5px 4px;font:500 11px var(--f-mono);text-align:center}
 .cell:focus-visible{outline:2px solid var(--accent)}
@@ -189,7 +190,7 @@ td.name button{display:inline}
 .cell:hover{transform:scale(1.06)}
 .cell.s-ok{background:var(--ok-bg);color:var(--ok)} .cell.s-atencao,.cell.s-renovar{background:var(--warn-bg);color:var(--warn)}
 .cell.s-venc{background:var(--bad-bg);color:var(--bad)} .cell.s-pend{background:var(--pend-bg);color:var(--pend)} .cell.s-and{background:var(--info-bg);color:var(--info)}
-.cell.s-sem,.cell.s-subst{background:transparent;color:color-mix(in srgb,var(--none) 70%,transparent);box-shadow:none}
+.cell.s-na{background:transparent;color:var(--muted);font-style:italic;box-shadow:none;font-size:10.5px}.cell.leg{outline:1.5px dashed color-mix(in srgb,currentColor 45%,transparent);outline-offset:-3px}.cell.s-sem,.cell.s-subst{background:transparent;color:color-mix(in srgb,var(--none) 70%,transparent);box-shadow:none}
 .pill{font-size:12.5px;padding:4px 10px}
 #fila td:first-child{box-shadow:inset 5px 0 0 var(--sev,transparent);padding-left:18px}
 dialog{border-radius:18px;box-shadow:0 30px 80px -20px rgb(0 0 0 / .5)}
@@ -262,7 +263,7 @@ button.mini:hover{border-color:var(--accent);color:var(--accent)}
         <input id="filaBusca" placeholder="Filtrar empresa" aria-label="Filtrar empresa" style="flex:0 1 220px">
       </div>
       <div class="chips" id="filaTipos"></div>
-      <p class="muted small" style="margin:0">Renovar a partir de: Estadual RJ conjunta (SEFAZ + PGE, vale 30 dias) 5 dias antes, PGM 14 dias antes, demais conforme a validade. Clique numa linha para lançar a nova certidão.</p>
+      <p class="muted small" style="margin:0">Renovar a partir de: SEFAZ/PGE (CND Estadual RJ conjunta, vale 30 dias) 5 dias antes, PGM 14 dias antes, demais conforme a validade. Clique numa linha para lançar a nova certidão.</p>
       <div class="scroll"><table><thead><tr><th>Empresa</th><th>Certidão</th><th>Validade</th><th>Situação</th><th>Renovar a partir de</th><th>Observação</th><th></th></tr></thead><tbody id="fila"></tbody></table></div>
     </div>
     <div class="panel">
@@ -401,7 +402,7 @@ button.mini:hover{border-color:var(--accent);color:var(--accent)}
 <script>
 const TIPOS=[
  {k:'RFB',n:'CND RFB/PGFN',a:'RFB',prazo:180,ant:15,m:['CND conjunta','RFB']},
- {k:'EST',n:'CND Estadual RJ conjunta (SEFAZ + PGE)',a:'EST-RJ',prazo:30,ant:5,m:['Estadual RJ','conjunta estadual']},
+ {k:'EST',n:'CND Estadual RJ – SEFAZ/PGE',a:'SEFAZ/PGE',prazo:30,ant:5,m:['Estadual RJ','conjunta estadual']},
  {k:'SEFAZ',n:'Fazenda Estadual (antiga, antes da unificação)',a:'SEFAZ*',prazo:90,ant:10,m:['Fazenda Estadual'],legado:true},
  {k:'PGE',n:'Dívida Ativa do Estado – PGE (antiga, antes da unificação)',a:'PGE*',prazo:180,ant:30,m:['Dívida Ativa do Estado'],legado:true},
  {k:'ISS',n:'ISS – Fazenda Municipal',a:'ISS',prazo:90,ant:15,m:['Fazenda Municipal']},
@@ -415,6 +416,7 @@ const TIPOS=[
  {k:'SICAF',n:'SICAF',a:'SICAF',prazo:365,ant:30,m:['SICAF']}
 ];
 const TK=Object.fromEntries(TIPOS.map(t=>[t.k,t]));
+const TV=TIPOS.filter(t=>!t.legado);
 const LINKS0={RFB:'https://solucoes.receita.fazenda.gov.br/Servicos/certidaointernet/PJ/Emitir',EST:'https://www.fazenda.rj.gov.br/portal-fazenda',SEFAZ:'https://www.fazenda.rj.gov.br/portal-fazenda',PGE:'https://www.pge.rj.gov.br/divida-ativa',ISS:'https://www2.rio.rj.gov.br/smf/forms/pesquisa.asp',PGM:'https://daminternet.rio.rj.gov.br/',FGTS:'https://consulta-crf.caixa.gov.br/consultacrf/pages/consultaEmpregador.jsf',TRAB:'https://cndt-certidao.tst.jus.br/inicio.faces'};
 let LINKS=Object.assign({},LINKS0),cfgVer=null;
 function chaveDe(e,k){return k==='ISS'?(e.im||'').replace(/\D/g,''):(e.cnpj||'').replace(/\D/g,'');}
@@ -422,7 +424,8 @@ function emitirHTML(e,k){const u=LINKS[k];const ch=chaveDe(e,k);const lab=k==='I
   return (u?'<a class="btn pri" href="'+esc(u)+'" target="_blank" rel="noopener" data-copy="'+esc(ch)+'" style="text-decoration:none">Emitir no site'+(ch?' (copia o '+lab+')':'')+'</a>':'<span class="small muted">Sem link cadastrado para esta certidão. Cadastre em Importar e backup.</span>')+(ch?' <button class="btn" data-copy="'+esc(ch)+'">Copiar '+lab+'</button>':'');}
 async function copiar(txt){try{await navigator.clipboard.writeText(txt);toast('Copiado: '+txt);}catch(e){toast('Não consegui copiar. '+txt);}}
 document.addEventListener('click',e=>{const a=e.target.closest('[data-copy]');if(a&&a.dataset.copy){copiar(a.dataset.copy);if(a.tagName==='BUTTON')e.preventDefault();}e.target.closest('.emit')&&e.stopPropagation();},true);
-const EST={venc:'Vencida',renovar:'Renovar agora',atencao:'Vence em 30 dias',pend:'Pendência',and:'Em andamento',ok:'Válida',sem:'Sem dado',subst:'Substituída pela conjunta'};
+const PRI={renovar:0,venc:1,pend:2,and:3,atencao:4,ok:5,sem:6,subst:7,na:8};
+const EST={na:'Não se aplica',venc:'Vencida',renovar:'Renovar agora',atencao:'Vence em 30 dias',pend:'Pendência',and:'Em andamento',ok:'Válida',sem:'Sem dado',subst:'Substituída pela conjunta'};
 const $=s=>document.querySelector(s);
 const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const SB_URL='https://bpnprrkfhrqsdwsevwsk.supabase.co',SB_KEY='sb_publishable_e6AIT0wPu3bG-2-TTCR5pQ_UAwhX1N7';
@@ -448,7 +451,13 @@ function brToIso(s){const m=/(\d{1,2})\/(\d{1,2})\/(\d{2,4})/.exec(s||'');if(!m)
 /* ---------- regras ---------- */
 function prazoDe(e,k){return (e.prazos&&+e.prazos[k])||TK[k].prazo;}
 function info(e,k){
+  const i=info0(e,k);if(k!=='EST'||i.est!=='sem'||i.c.na)return i;
+  const v=['SEFAZ','PGE'].map(x=>info0(e,x)).filter(x=>x.est!=='subst'&&x.est!=='sem'&&x.est!=='na').sort((x,y)=>PRI[x.est]-PRI[y.est])[0];
+  return v?Object.assign({},v,{legado:true}):i;
+}
+function info0(e,k){
   const c=(e.certs||{})[k]||{};const t=TK[k];
+  if(c.na)return {c,val:null,n:null,est:'na',renovar:null,manual:false};
   const val=c.validade||(c.emissao?add(c.emissao,prazoDe(e,k)):null);
   const s=String(c.status||'');let est;
   const n=val?dias(val):null;
@@ -474,7 +483,7 @@ addEventListener('hashchange',()=>{const v=location.hash.slice(1);if(document.ge
 
 /* ---------- render ---------- */
 function render(){renderPainel();renderGrid();renderSelects();renderLote();renderRelForm();}
-function linhas(){const out=[];ativos().forEach(e=>{if(e.ativo===false)return;TIPOS.forEach(t=>{const i=info(e,t.k);if(i.est==='sem'||i.est==='ok'||i.est==='subst')return;out.push({e,t,i});});});return out;}
+function linhas(){const out=[];ativos().forEach(e=>{if(e.ativo===false)return;TV.forEach(t=>{const i=info(e,t.k);if(i.est==='sem'||i.est==='ok'||i.est==='subst'||i.est==='na')return;out.push({e,t,i});});});return out;}
 function renderPainel(){
   requestAnimationFrame(desenhar);
   const L=linhas();const cnt={venc:0,renovar:0,atencao:0,pend:0,and:0};L.forEach(x=>cnt[x.i.est]++);
@@ -488,7 +497,7 @@ function renderPainel(){
   if(!EMP.length){tb.innerHTML='<tr><td colspan="6" class="empty">Nenhuma empresa ainda. Vá em <b>Importar e backup</b> e importe a planilha, ou cadastre em <b>Empresas</b>.</td></tr>';return;}
   if(!F.length){tb.innerHTML='<tr><td colspan="6" class="empty">Nada nesta fila. Tudo em dia.</td></tr>';return;}
   tb.innerHTML=F.slice(0,400).map(x=>{const n=x.i.n;const d=n===null?'':(n<0?' · venceu há '+(-n)+'d':' · '+n+'d');
-    return '<tr data-e="'+esc(x.e.id)+'" data-t="'+x.t.k+'" style="cursor:pointer;--sev:var(--'+({venc:'bad',renovar:'warn',pend:'pend',and:'info',atencao:'warn'}[x.i.est])+')"><td class="name">'+esc(x.e.nome)+'</td><td>'+esc(x.t.n)+'</td><td class="mono">'+br(x.i.val)+(x.i.manual?' *':'')+'</td><td>'+pill(x.i.est,EST[x.i.est]+d)+'</td><td class="mono">'+br(x.i.renovar)+'</td><td class="small muted obs">'+(o=>'<div class="clamp" title="'+esc(o)+'">'+esc(o)+'</div>')([x.t.legado?'Renovar emitindo a CND Estadual RJ conjunta':'',x.i.c.status,x.i.c.obs].filter(Boolean).join(' · ').slice(0,220))+'</td><td>'+(LINKS[x.t.k]?'<a class="link emit" href="'+esc(LINKS[x.t.k])+'" target="_blank" rel="noopener" data-copy="'+esc(chaveDe(x.e,x.t.k))+'">Emitir</a>':'')+'</td></tr>';}).join('');
+    return '<tr data-e="'+esc(x.e.id)+'" data-t="'+x.t.k+'" style="cursor:pointer;--sev:var(--'+({venc:'bad',renovar:'warn',pend:'pend',and:'info',atencao:'warn'}[x.i.est])+')"><td class="name">'+esc(x.e.nome)+'</td><td>'+esc(x.t.n)+'</td><td class="mono">'+br(x.i.val)+(x.i.manual?' *':'')+'</td><td>'+pill(x.i.est,EST[x.i.est]+d)+'</td><td class="mono">'+br(x.i.renovar)+'</td><td class="small muted obs">'+(o=>'<div class="clamp" title="'+esc(o)+'">'+esc(o)+'</div>')([x.i.c.status,x.i.c.obs].filter(Boolean).join(' · ').slice(0,220))+'</td><td>'+(LINKS[x.t.k]?'<a class="link emit" href="'+esc(LINKS[x.t.k])+'" target="_blank" rel="noopener" data-copy="'+esc(chaveDe(x.e,x.t.k))+'">Emitir</a>':'')+'</td></tr>';}).join('');
   const H=HIST.slice(0,12);
   $('#hist').innerHTML=H.length?H.map(h=>'<div style="padding:4px 0;border-bottom:1px solid var(--line)"><span class="mono muted">'+esc((h.em||'').slice(0,16).replace('T',' '))+'</span> · <b>'+esc(h.empresa)+'</b> · '+esc(h.texto)+'</div>').join(''):'<span class="muted">Os lançamentos aparecem aqui.</span>';
   desenhar();
@@ -526,22 +535,23 @@ $('#filaBusca').oninput=e=>{st.fbusca=e.target.value.toLowerCase();renderPainel(
 $('#fila').onclick=e=>{const r=e.target.closest('tr[data-e]');if(r)editCert(r.dataset.e,r.dataset.t);};
 
 function renderGrid(){
-  $('#legenda').innerHTML=['renovar','venc','atencao','pend','and','ok','sem'].map(k=>pill(k)).join('')+'<span class="muted">Clique numa célula para lançar · * validade informada manualmente · SEFAZ* e PGE* são as certidões antigas, de antes da unificação; as novas vão em EST-RJ</span>';
-  $('#gridHead').innerHTML='<tr><th>Empresa</th>'+TIPOS.map(t=>'<th title="'+esc(t.n)+'">'+t.a+'</th>').join('')+'</tr>';
+  $('#legenda').innerHTML=['renovar','venc','atencao','pend','and','ok','sem','na'].map(k=>pill(k)).join('')+'<span class="muted">Clique numa célula para lançar · * validade informada manualmente · N/A = a empresa não precisa da certidão · clique no título da coluna para renovar aquela certidão em lote</span>';
+  $('#gridHead').innerHTML='<tr><th>Empresa</th>'+TV.map(t=>'<th title="'+esc(t.n)+' · clique para renovar em lote" data-lt="'+t.k+'" style="cursor:pointer">'+t.a+'</th>').join('')+'</tr>';
   const q=st.busca;const L=ativos().filter(e=>!q||[e.nome,e.razao,e.cnpj,e.im].join(' ').toLowerCase().includes(q));
   if(!dbOk){$('#grid').innerHTML='<tr><td colspan="15" class="empty">Carregando…</td></tr>';return;}
   if(!L.length){$('#grid').innerHTML='<tr><td colspan="15" class="empty">'+(EMP.length?'Nenhuma empresa encontrada.':'Nenhuma empresa cadastrada. Importe a planilha ou clique em Nova empresa.')+'</td></tr>';return;}
-  $('#grid').innerHTML=L.map(e=>'<tr><td class="name"><button data-emp="'+esc(e.id)+'">'+esc(e.nome)+'</button>'+(e.simples===true?' <span class="pill s-and" title="Simples Nacional">SN</span>':'')+(e.ativo===false?' <span class="pill s-sem">arquivada</span>':'')+'</td>'+TIPOS.map(t=>{const i=info(e,t.k);const lab=i.est==='subst'?'→EST':i.val?(i.n<0?'venc':i.n+'d'):(i.est==='sem'?'—':(i.est==='pend'?'pend':'and'));return '<td class="c"><button class="cell s-'+i.est+'" data-e="'+esc(e.id)+'" data-t="'+t.k+'" title="'+esc(t.n+' · '+(i.val?'válida até '+br(i.val):EST[i.est])+(i.c.status?' · '+i.c.status:''))+'">'+lab+(i.manual?'*':'')+'</button></td>';}).join('')+'</tr>').join('');
+  $('#grid').innerHTML=L.map(e=>'<tr><td class="name"><button data-emp="'+esc(e.id)+'">'+esc(e.nome)+'</button>'+(e.simples===true?' <span class="pill s-and" title="Simples Nacional">SN</span>':'')+(e.ativo===false?' <span class="pill s-sem">arquivada</span>':'')+'</td>'+TV.map(t=>{const i=info(e,t.k);const lab=i.est==='na'?'N/A':i.val?(i.n<0?'venc':i.n+'d'):(i.est==='sem'?'—':(i.est==='pend'?'pend':'and'));return '<td class="c"><button class="cell s-'+i.est+'" data-e="'+esc(e.id)+'" data-t="'+t.k+'" title="'+esc(t.n+' · '+(i.val?'válida até '+br(i.val):EST[i.est])+(i.c.status?' · '+i.c.status:''))+'">'+lab+(i.manual?'*':'')+'</button></td>';}).join('')+'</tr>').join('');
 }
 $('#busca').oninput=e=>{st.busca=e.target.value.toLowerCase().trim();renderGrid();};
 $('#verArq').onchange=e=>{st.arq=e.target.checked;render();};
+$('#gridHead').onclick=e=>{const h=e.target.closest('[data-lt]');if(!h)return;LT=h.dataset.lt;lAtual=null;renderLote();view('lote');};
 $('#grid').onclick=e=>{const c=e.target.closest('.cell');if(c)return editCert(c.dataset.e,c.dataset.t);const n=e.target.closest('[data-emp]');if(n)abrirEmpresa(n.dataset.emp);};
 
 function renderSelects(){
   const cur=$('#mEmp').value;$('#mEmp').innerHTML='<option value="">Escolha…</option>'+ativos().filter(e=>e.ativo!==false).map(e=>'<option value="'+esc(e.id)+'">'+esc(e.nome)+'</option>').join('');$('#mEmp').value=cur;
-  if(!$('#mTipo').options.length)$('#mTipo').innerHTML=TIPOS.map(t=>'<option value="'+t.k+'">'+esc(t.n)+'</option>').join('');
-  if(!document.activeElement||!document.activeElement.closest('#links'))$('#links').innerHTML=TIPOS.map(t=>'<label class="f">'+esc(t.n)+'<input data-lk="'+t.k+'" value="'+esc(LINKS[t.k]||'')+'" placeholder="https://…"></label>').join('');
-  $('#prazos').innerHTML=TIPOS.map(t=>'<tr><td>'+esc(t.n)+'</td><td class="mono">'+t.prazo+' dias</td><td class="mono">'+t.ant+' dias antes</td></tr>').join('');
+  if(!$('#mTipo').options.length)$('#mTipo').innerHTML=TV.map(t=>'<option value="'+t.k+'">'+esc(t.n)+'</option>').join('');
+  if(!document.activeElement||!document.activeElement.closest('#links'))$('#links').innerHTML=TV.map(t=>'<label class="f">'+esc(t.n)+'<input data-lk="'+t.k+'" value="'+esc(LINKS[t.k]||'')+'" placeholder="https://…"></label>').join('');
+  $('#prazos').innerHTML=TV.map(t=>'<tr><td>'+esc(t.n)+'</td><td class="mono">'+t.prazo+' dias</td><td class="mono">'+t.ant+' dias antes</td></tr>').join('');
 }
 
 /* ---------- dialog ---------- */
@@ -550,19 +560,20 @@ function abrir(t,body,foot){$('#dT').textContent=t;$('#dB').innerHTML=body;$('#d
 function emp(id){return EMP.find(e=>e.id===id);}
 
 function editCert(id,k){
-  const e=emp(id);if(!e)return;const t=TK[k];const i=info(e,k);const c=i.c;
+  const e=emp(id);if(!e)return;const t=TK[k];const i=info(e,k);const c=info0(e,k).c;
   abrir(e.nome+' · '+t.n,
    '<div class="row">'+pill(i.est,EST[i.est])+'<span class="small muted">Prazo padrão '+prazoDe(e,k)+' dias · renovar '+t.ant+' dias antes</span></div>'+
-   '<div class="row">'+emitirHTML(e,k)+'</div>'+
-   '<div class="formgrid"><label class="f">Data de emissão<input type="date" id="eEmi" value="'+esc(c.emissao||'')+'"></label>'+
+   (c.na?'<p class="note">Marcada como <b>não se aplica</b>: esta certidão não é acompanhada para esta empresa.</p>':'')+'<div class="row">'+emitirHTML(e,k)+'</div>'+
+   '<div class="formgrid"><label class="f">Data de emissão<span class="row" style="gap:6px;flex-wrap:nowrap"><input type="date" id="eEmi" value="'+esc(c.emissao||'')+'" style="flex:1"><button type="button" class="btn" id="eHoje">Hoje</button></span></label>'+
    '<label class="f">Situação<input id="eSt" value="'+esc(c.status||'')+'" placeholder="NEGATIVA, PRONTO EM…"></label></div>'+
    '<label class="row small"><input type="checkbox" id="eVOn" '+(c.validade?'checked':'')+'> Validade diferente do prazo padrão (ex.: certidão de regularização)</label>'+
    '<label class="f" id="eVBox" '+(c.validade?'':'hidden')+'>Validade real<input type="date" id="eVal" value="'+esc(c.validade||'')+'"></label>'+
    '<label class="f">Observação<textarea id="eObs" style="min-height:70px">'+esc(c.obs||'')+'</textarea></label>'+
    '<p class="small" id="eCalc"></p>',
-   '<button class="btn" id="eClr">Limpar certidão</button><button class="btn pri" id="eOk">Salvar</button>');
+   '<button class="btn" id="eNa">'+(c.na?'Voltar a acompanhar':'Não se aplica a esta empresa')+'</button><button class="btn" id="eClr">Limpar certidão</button><button class="btn pri" id="eOk">Salvar</button>');
+  $('#eNa').onclick=async()=>{await salvarCert(id,k,c.na?{emissao:null,validade:null,status:'',obs:''}:{na:true,emissao:null,validade:null,status:'',obs:c.obs||''});dlg.close();};
   const calc=()=>{const v=$('#eVOn').checked?$('#eVal').value:($('#eEmi').value?add($('#eEmi').value,prazoDe(e,k)):'');$('#eCalc').innerHTML=v?'Válida até <b class="mono">'+br(v)+'</b> · renovar a partir de <b class="mono">'+br(add(v,-t.ant))+'</b>':'<span class="muted">Informe a data de emissão para calcular a validade.</span>';};
-  ['eEmi','eVal'].forEach(x=>$('#'+x).oninput=calc);$('#eVOn').onchange=()=>{$('#eVBox').hidden=!$('#eVOn').checked;calc();};calc();
+  ['eEmi','eVal'].forEach(x=>$('#'+x).oninput=calc);$('#eHoje').onclick=()=>{$('#eEmi').value=hojeISO();if(!$('#eSt').value)$('#eSt').value='NEGATIVA';calc();};$('#eVOn').onchange=()=>{$('#eVBox').hidden=!$('#eVOn').checked;calc();};calc();
   $('#eOk').onclick=async()=>{await salvarCert(id,k,{emissao:$('#eEmi').value||null,validade:$('#eVOn').checked&&$('#eVal').value?$('#eVal').value:null,status:$('#eSt').value.trim(),obs:$('#eObs').value.trim()});dlg.close();};
   $('#eClr').onclick=async()=>{await salvarCert(id,k,{emissao:null,validade:null,status:'',obs:''});dlg.close();};
 }
@@ -571,7 +582,7 @@ function abrirEmpresa(id){
   const e=emp(id);if(!e)return;
   const kv=[['Razão social',e.razao],['CNPJ',e.cnpj],['Inscrição municipal',e.im],['Inscrição estadual',e.ie],['Natureza / registro',e.natureza],['Simples Nacional',e.simples===true?'Sim':e.simples===false?'Não':''],['Nome fantasia',e.fantasia],['Endereço',[e.endereco,e.bairro,e.cidade,e.uf,e.cep].filter(Boolean).join(', ')],['Telefone',e.tel],['E-mail',e.email],['Observações',e.obs]];
   abrir(e.nome,'<div class="kv">'+kv.map(([k,v])=>'<div><span>'+k+'</span>'+(v?esc(v):'<span class="muted" style="text-transform:none;letter-spacing:0">—</span>')+'</div>').join('')+'</div>'+
-   '<div class="scroll"><table><thead><tr><th>Certidão</th><th>Emissão</th><th>Validade</th><th>Situação</th></tr></thead><tbody>'+TIPOS.map(t=>{const i=info(e,t.k);return '<tr data-t="'+t.k+'" style="cursor:pointer"><td>'+esc(t.n)+'</td><td class="mono">'+br(i.c.emissao)+'</td><td class="mono">'+br(i.val)+(i.manual?' *':'')+'</td><td>'+pill(i.est,i.c.status||EST[i.est])+'</td></tr>';}).join('')+'</tbody></table></div>',
+   '<div class="scroll"><table><thead><tr><th>Certidão</th><th>Emissão</th><th>Validade</th><th>Situação</th></tr></thead><tbody>'+TV.map(t=>{const i=info(e,t.k);return '<tr data-t="'+t.k+'" style="cursor:pointer"><td>'+esc(t.n)+'</td><td class="mono">'+br(i.c.emissao)+'</td><td class="mono">'+br(i.val)+(i.manual?' *':'')+'</td><td>'+pill(i.est,i.c.status||EST[i.est])+'</td></tr>';}).join('')+'</tbody></table></div>',
    '<button class="btn" id="eRel">Relatório da empresa</button><button class="btn danger" id="eArq">'+(e.ativo===false?'Reativar':'Arquivar (não é mais cliente)')+'</button><button class="btn pri" id="eEd">Editar cadastro</button>');
   $('#dB').querySelector('tbody').onclick=ev=>{const r=ev.target.closest('tr[data-t]');if(r){dlg.close();editCert(id,r.dataset.t);}};
   $('#eEd').onclick=()=>formEmpresa(e);$('#eRel').onclick=()=>gerarRelatorio('empresa',{id:e.id});
@@ -613,9 +624,9 @@ async function salvarEmp(id,patch,texto){const e=emp(id);const d=Object.assign({
 function strip(e){const d=Object.assign({},e);delete d.id;return d;}
 async function salvarCert(id,k,c,silent){
   const e=emp(id);const certs=Object.assign({},e.certs||{});
-  if(!c.emissao&&!c.validade&&!c.status&&!c.obs)delete certs[k];else certs[k]=Object.assign({},c,{em:new Date().toISOString()});
+  if(!c.na&&!c.emissao&&!c.validade&&!c.status&&!c.obs)delete certs[k];else certs[k]=Object.assign({},c,{em:new Date().toISOString()});
   const val=c.validade||(c.emissao?add(c.emissao,prazoDe(e,k)):null);
-  const ok=await gravar(id,Object.assign(strip(e),{certs}),TK[k].a+': '+(c.emissao?'emitida '+br(c.emissao)+(val?', válida até '+br(val):''):'')+(c.status?' · '+c.status:''),e.nome);
+  const ok=await gravar(id,Object.assign(strip(e),{certs}),TK[k].a+': '+(c.na?'marcada como não se aplica':'')+(c.emissao?'emitida '+br(c.emissao)+(val?', válida até '+br(val):''):'')+(c.status?' · '+c.status:''),e.nome);
   if(ok){e.certs=certs;if(!silent){toast('Salvo: '+e.nome+' · '+TK[k].a);render();}}
   return ok;
 }
@@ -676,7 +687,7 @@ $('#lGo').onclick=async()=>{
 function renderRev(duv){
   $('#revBox').hidden=!REV.length;$('#revNotes').hidden=!duv.length;$('#revNotes').textContent=duv.length?'Atenção: '+duv.join(' · '):'';
   const opE='<option value="">— escolha —</option>'+ativos().filter(e=>e.ativo!==false).map(e=>'<option value="'+esc(e.id)+'">'+esc(e.nome)+'</option>').join('');
-  $('#rev').innerHTML=REV.map((r,i)=>'<tr data-i="'+i+'"><td><input type="checkbox" data-f="ok" '+(r.ok?'checked':'')+' aria-label="Incluir"></td><td><select data-f="id">'+opE+'</select>'+'<div class="small muted">'+esc(r.nomeLido)+'</div>'+'</td><td><select data-f="tipo">'+TIPOS.map(t=>'<option value="'+t.k+'">'+t.a+'</option>').join('')+'</select></td><td><input type="date" data-f="emissao" value="'+esc(r.emissao)+'"></td><td><input type="date" data-f="validade" value="'+esc(r.validade)+'"></td><td><input data-f="status" value="'+esc(r.status)+'"></td><td><input data-f="obs" value="'+esc(r.obs)+'"></td></tr>').join('');
+  $('#rev').innerHTML=REV.map((r,i)=>'<tr data-i="'+i+'"><td><input type="checkbox" data-f="ok" '+(r.ok?'checked':'')+' aria-label="Incluir"></td><td><select data-f="id">'+opE+'</select>'+'<div class="small muted">'+esc(r.nomeLido)+'</div>'+'</td><td><select data-f="tipo">'+TV.map(t=>'<option value="'+t.k+'">'+t.a+'</option>').join('')+'</select></td><td><input type="date" data-f="emissao" value="'+esc(r.emissao)+'"></td><td><input type="date" data-f="validade" value="'+esc(r.validade)+'"></td><td><input data-f="status" value="'+esc(r.status)+'"></td><td><input data-f="obs" value="'+esc(r.obs)+'"></td></tr>').join('');
   [...$('#rev').rows].forEach((tr,i)=>{tr.querySelector('[data-f=id]').value=REV[i].id;tr.querySelector('[data-f=tipo]').value=REV[i].tipo;});
 }
 $('#rev').oninput=e=>{const tr=e.target.closest('tr');const f=e.target.dataset.f;REV[+tr.dataset.i][f]=e.target.type==='checkbox'?e.target.checked:e.target.value;};
@@ -854,7 +865,7 @@ const SUGS=['Quais certidões posso pedir hoje?','Quais PGM vencem nos próximos
 $('#sugs').innerHTML=SUGS.map(s=>'<button class="chip">'+esc(s)+'</button>').join('');
 $('#sugs').onclick=e=>{const b=e.target.closest('.chip');if(b){$('#qText').value=b.textContent;$('#qGo').click();}};
 let qCtl;$('#qStop').onclick=()=>qCtl&&qCtl.abort();
-function resumoEmp(e){return {nome:e.nome,razao:e.razao,cnpj:e.cnpj,im:e.im,natureza:e.natureza,cidade:e.cidade,obs:e.obs,certidoes:TIPOS.map(t=>{const i=info(e,t.k);return {tipo:t.n,emissao:i.c.emissao||null,validade:i.val,situacao:EST[i.est],status:i.c.status||'',obs:(i.c.obs||'').slice(0,200),renovarAPartirDe:i.renovar};})};}
+function resumoEmp(e){return {nome:e.nome,razao:e.razao,cnpj:e.cnpj,im:e.im,natureza:e.natureza,cidade:e.cidade,obs:e.obs,certidoes:TV.map(t=>{const i=info(e,t.k);return {tipo:t.n,emissao:i.c.emissao||null,validade:i.val,situacao:EST[i.est],status:i.c.status||'',obs:(i.c.obs||'').slice(0,200),renovarAPartirDe:i.renovar};})};}
 $('#qGo').onclick=async()=>{
   if(!sample)return toast('O Claude não está disponível nesta visualização.');
   const q=$('#qText').value.trim();if(!q)return;
@@ -918,7 +929,7 @@ $('#linksSave').onclick=async()=>{const d={};document.querySelectorAll('[data-lk
 function baixar(nome,data){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([data],{type:nome.endsWith('.csv')?'text/csv;charset=utf-8':'application/json'}));a.download=nome;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},1000);}
 $('#bJson').onclick=()=>baixar('certidoes-jopec-'+hojeISO()+'.json',JSON.stringify(EMP.map(strip),null,1));
 $('#bCsv').onclick=()=>{const q=v=>'"'+String(v??'').replace(/"/g,'""')+'"';const L=[['Empresa','CNPJ','Certidão','Emissão','Validade','Situação','Status','Observação'].map(q).join(';')];
-  ativos().forEach(e=>TIPOS.forEach(t=>{const i=info(e,t.k);if(i.est==='sem'&&!i.c.obs)return;L.push([e.nome,e.cnpj,t.n,br(i.c.emissao),br(i.val),EST[i.est],i.c.status,i.c.obs].map(q).join(';'));}));
+  ativos().forEach(e=>TV.forEach(t=>{const i=info(e,t.k);if(i.est==='sem'&&!i.c.obs)return;L.push([e.nome,e.cnpj,t.n,br(i.c.emissao),br(i.val),EST[i.est],i.c.status,i.c.obs].map(q).join(';'));}));
   baixar('certidoes-jopec-'+hojeISO()+'.csv','﻿'+L.join('\n'));};
 
 
@@ -927,14 +938,12 @@ const ADMINS=['mateus.jopec@gmail.com'];let isAdmin=false,userEmail='';
 function aplicarPapel(email){userEmail=(email||'').toLowerCase();isAdmin=ADMINS.includes(userEmail);$('#tabDados').hidden=!isAdmin;if(!isAdmin&&!$('#v-dados').hidden)view('painel');}
 
 /* ---------- renovar em lote ---------- */
-const PRI={renovar:0,venc:1,pend:2,and:3,atencao:4,ok:5,sem:6,subst:7};
-function infoLote(e,k){const i=info(e,k);if(k!=='EST'||i.est!=='sem')return i;
-  const a=info(e,'SEFAZ'),b=info(e,'PGE');const v=[a,b].filter(x=>x.est!=='subst'&&x.est!=='sem').sort((x,y)=>PRI[x.est]-PRI[y.est])[0];return v?Object.assign({},v,{legado:true}):i;}
+const infoLote=info;
 let LT=null;try{LT=localStorage.getItem('loteTipo');}catch(e){}
 const LE0=['venc','renovar','pend'];let LE=new Set(LE0);const FEITO=new Set();let lAtual=null;
 const LOTE_TIPOS=()=>TIPOS.filter(t=>!t.legado);
 function lLinhas(k){const q=($('#lBusca').value||'').toLowerCase();
-  return EMP.filter(e=>e.ativo!==false).map(e=>({e,i:infoLote(e,k)})).filter(x=>(LE.has(x.i.est)||(LE.has('sem')&&x.i.est==='sem'))&&(!q||x.e.nome.toLowerCase().includes(q)))
+  return EMP.filter(e=>e.ativo!==false).map(e=>({e,i:infoLote(e,k)})).filter(x=>LE.has(x.i.est)&&(!q||x.e.nome.toLowerCase().includes(q)))
    .sort(ordAcao);}
 function ordAcao(a,b){return PRI[a.i.est]-PRI[b.i.est]||(a.i.est==='venc'?((a.i.val||'0')>(b.i.val||'0')?-1:(a.i.val||'0')<(b.i.val||'0')?1:0):((a.i.val||'9')<(b.i.val||'9')?-1:(a.i.val||'9')>(b.i.val||'9')?1:0))||a.e.nome.localeCompare(b.e.nome,'pt');}
 function renderLote(){
@@ -946,13 +955,13 @@ function renderLote(){
   const tot=cont.reduce((a,c)=>a+c.n,0);const bl=$('#bLote');bl.hidden=!tot;bl.textContent=tot;
   try{document.title=(tot?'('+tot+') ':'')+'Certidões Jopec';if(navigator.setAppBadge)tot?navigator.setAppBadge(tot):navigator.clearAppBadge();}catch(e){}
   const t=TK[LT];$('#lTit').textContent=t.n;
-  $('#lEst').innerHTML=[['venc','Vencidas'],['renovar','Renovar agora'],['pend','Pendências'],['and','Em andamento'],['atencao','Vencem em 30 dias'],['ok','Válidas'],['sem','Sem lançamento']].map(([k,l])=>'<button class="chip" data-k="'+k+'" aria-pressed="'+LE.has(k)+'">'+l+'</button>').join('');
+  $('#lEst').innerHTML=[['venc','Vencidas'],['renovar','Renovar agora'],['pend','Pendências'],['and','Em andamento'],['atencao','Vencem em 30 dias'],['ok','Válidas'],['sem','Sem lançamento'],['na','Não se aplica']].map(([k,l])=>'<button class="chip" data-k="'+k+'" aria-pressed="'+LE.has(k)+'">'+l+'</button>').join('');
   const L=lLinhas(LT);const feitos=L.filter(x=>FEITO.has(LT+'|'+x.e.id)).length;
   $('#lProg').textContent=L.length?feitos+' de '+L.length+' já abertas nesta sessão':'';$('#lBar').style.width=L.length?(feitos*100/L.length)+'%':'0';
   $('#lNext').disabled=!L.length||!LINKS[LT];$('#lNext').textContent=!LINKS[LT]?'Sem site cadastrado':feitos&&feitos===L.length?'Recomeçar do início ▸':'Emitir a próxima ▸';
   const lab=LT==='ISS'?'IM ':'';
   $('#lLista').innerHTML=!dbOk?'<tr><td colspan="7" class="empty">Carregando…</td></tr>':!L.length?'<tr><td colspan="7" class="empty">Nenhuma empresa nesta seleção. Tudo em dia com '+esc(t.a)+'.</td></tr>':L.map(x=>{const ch=chaveDe(x.e,LT);const f=FEITO.has(LT+'|'+x.e.id);const n=x.i.n;const d=n===null?'':(n<0?' · venceu há '+(-n)+'d':' · '+n+'d');
-    return '<tr data-e="'+esc(x.e.id)+'" class="'+(f?'feito':'')+(lAtual===x.e.id?' atual':'')+'" style="--sev:var(--'+({venc:'bad',renovar:'warn',pend:'pend',and:'info',atencao:'warn',ok:'ok',sem:'none'}[x.i.est]||'none')+')"><td class="chk">'+(f?'✓':'')+'</td><td class="name"><button data-emp="'+esc(x.e.id)+'">'+esc(x.e.nome)+'</button></td><td>'+(ch?'<button class="chave" data-copy="'+esc(ch)+'" title="Copiar">'+lab+esc(fmtDoc(ch))+'</button>':'<span class="muted small">'+(LT==='ISS'?'sem inscrição municipal':'sem CNPJ')+'</span>')+'</td><td class="mono">'+br(x.i.val)+(x.i.legado?' <span class="muted small">(antiga)</span>':'')+'</td><td>'+pill(x.i.est,EST[x.i.est]+d)+'</td><td class="small muted obs"><div class="clamp" title="'+esc([x.i.c.status,x.i.c.obs].filter(Boolean).join(' · '))+'">'+esc([x.i.c.status,x.i.c.obs].filter(Boolean).join(' · ').slice(0,200))+'</div></td><td><div class="acts">'+(LINKS[LT]?'<button class="mini" data-a="emitir">Emitir</button>':'')+(x.i.est!=='and'?'<button class="mini" data-a="pedida" title="Marcar como solicitada (protocolo / aguardando)">Pedida</button>':'')+'<button class="mini" data-a="lancar">Lançar</button></div></td></tr>';}).join('');
+    return '<tr data-e="'+esc(x.e.id)+'" class="'+(f?'feito':'')+(lAtual===x.e.id?' atual':'')+'" style="--sev:var(--'+({venc:'bad',renovar:'warn',pend:'pend',and:'info',atencao:'warn',ok:'ok',sem:'none'}[x.i.est]||'none')+')"><td class="chk">'+(f?'✓':'')+'</td><td class="name"><button data-emp="'+esc(x.e.id)+'">'+esc(x.e.nome)+'</button></td><td>'+(ch?'<button class="chave" data-copy="'+esc(ch)+'" title="Copiar">'+lab+esc(fmtDoc(ch))+'</button>':'<span class="muted small">'+(LT==='ISS'?'sem inscrição municipal':'sem CNPJ')+'</span>')+'</td><td class="mono">'+br(x.i.val)+'</td><td>'+pill(x.i.est,EST[x.i.est]+d)+'</td><td class="small muted obs"><div class="clamp" title="'+esc([x.i.c.status,x.i.c.obs].filter(Boolean).join(' · '))+'">'+esc([x.i.c.status,x.i.c.obs].filter(Boolean).join(' · ').slice(0,200))+'</div></td><td><div class="acts">'+(LINKS[LT]?'<button class="mini" data-a="emitir">Emitir</button>':'')+(x.i.est!=='and'?'<button class="mini" data-a="pedida" title="Marcar como solicitada (protocolo / aguardando)">Pedida</button>':'')+'<button class="mini" data-a="lancar">Lançar</button><button class="mini" data-a="na" title="Esta empresa não precisa desta certidão; ela sai do controle">N/A</button></div></td></tr>';}).join('');
 }
 function fmtDoc(d){d=String(d||'');if(d.length===14)return d.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/,'$1.$2.$3/$4-$5');return d;}
 function abrirSite(e){const ch=chaveDe(e,LT);if(ch)copiar(ch);FEITO.add(LT+'|'+e.id);lAtual=e.id;window.open(LINKS[LT],'emissao_'+LT);renderLote();
@@ -966,6 +975,7 @@ $('#lRel').onclick=()=>gerarRelatorio('certidao',{k:LT});
 $('#lLista').onclick=async e=>{const n=e.target.closest('[data-emp]');if(n)return abrirEmpresa(n.dataset.emp);const b=e.target.closest('[data-a]');if(!b)return;const id=b.closest('tr').dataset.e;const em=emp(id);
   if(b.dataset.a==='emitir')abrirSite(em);
   else if(b.dataset.a==='lancar')editCert(id,LT);
+  else if(b.dataset.a==='na'){if(!confirm(em.nome+' não precisa de '+TK[LT].a+'? Ela sai da lista e dos alertas (dá para desfazer na ficha da empresa).'))return;b.disabled=true;await salvarCert(id,LT,{na:true,emissao:null,validade:null,status:'',obs:((em.certs||{})[LT]||{}).obs||''});}
   else if(b.dataset.a==='pedida'){const old=(em.certs||{})[LT]||{};b.disabled=true;await salvarCert(id,LT,{emissao:old.emissao||null,validade:old.validade||null,status:'SOLICITADA em '+br(hojeISO()),obs:old.obs||''});}};
 $('#lPick').onclick=()=>$('#lFilesL').click();
 $('#lFilesL').onchange=e=>{const f=[...e.target.files];e.target.value='';view('lancar');anexarCertidoes(f);};
@@ -986,14 +996,14 @@ $('#rCsv').onclick=()=>{const d=dadosRel(RT,{k:$('#rCert').value,id:$('#rEmp').v
 function dadosRel(tipo,o){const act=EMP.filter(e=>e.ativo!==false).sort((a,b)=>a.nome.localeCompare(b.nome,'pt'));const T=LOTE_TIPOS();let linhas=[];
   if(tipo==='acao')T.forEach(t=>act.forEach(e=>{const i=infoLote(e,t.k);if(['venc','renovar','pend','and'].includes(i.est)&&!(o.velhas&&i.est==='venc'&&i.n<-365))linhas.push({e,t,i});}));
   else if(tipo==='certidao'){const t=TK[o.k];act.forEach(e=>linhas.push({e,t,i:infoLote(e,t.k)}));linhas.sort((a,b)=>(a.i.val||'9')<(b.i.val||'9')?-1:(a.i.val||'9')>(b.i.val||'9')?1:a.e.nome.localeCompare(b.e.nome,'pt'));}
-  else if(tipo==='empresa'){const e=emp(o.id);if(e)TIPOS.forEach(t=>{const i=info(e,t.k);if(t.legado&&(i.est==='subst'||i.est==='sem'))return;linhas.push({e,t,i});});}
+  else if(tipo==='empresa'){const e=emp(o.id);if(e)TV.forEach(t=>linhas.push({e,t,i:info(e,t.k)}));}
   else act.forEach(e=>T.forEach(t=>linhas.push({e,t,i:infoLote(e,t.k)})));
   return {act,T,linhas};}
 function gerarRelatorio(tipo,o){o=o||{};const d=dadosRel(tipo,o);const now=new Date();const H=s=>esc(s);
   const base=new URL('.',location.href).href;
   const quando=br(hojeISO())+' às '+String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
-  const cor={venc:'#b3261e',renovar:'#a15c00',atencao:'#8a6d00',pend:'#8a4b00',and:'#1d5fa8',ok:'#1f7a4a',sem:'#7d8a86',subst:'#7d8a86'};
-  const bg={venc:'#fbdcd8',renovar:'#fdecc8',atencao:'#fff4cf',pend:'#f6e0c7',and:'#dbe8f8',ok:'#dff1e6',sem:'#f1f2f2',subst:'#f1f2f2'};
+  const cor={na:'#8a8f8e',venc:'#b3261e',renovar:'#a15c00',atencao:'#8a6d00',pend:'#8a4b00',and:'#1d5fa8',ok:'#1f7a4a',sem:'#7d8a86',subst:'#7d8a86'};
+  const bg={na:'#ffffff',venc:'#fbdcd8',renovar:'#fdecc8',atencao:'#fff4cf',pend:'#f6e0c7',and:'#dbe8f8',ok:'#dff1e6',sem:'#f1f2f2',subst:'#f1f2f2'};
   const pl=(est,txt)=>'<span class="pl" style="color:'+cor[est]+';background:'+bg[est]+'">'+H(txt||EST[est])+'</span>';
   const obsTxt=i=>o.obs?H([i.c.status,i.c.obs].filter(Boolean).join(' · ')):H(i.c.status||'');
   // resumo
@@ -1011,7 +1021,7 @@ function gerarRelatorio(tipo,o){o=o||{};const d=dadosRel(tipo,o);const now=new D
     const kv=[['CNPJ',fmtDoc(e.cnpj)],['Inscrição municipal',e.im],['Inscrição estadual',e.ie],['Simples Nacional',e.simples===true?'Sim':e.simples===false?'Não':''],['Natureza / registro',e.natureza],['Endereço',[e.endereco,e.bairro,e.cidade,e.uf,e.cep].filter(Boolean).join(', ')]].filter(x=>x[1]);
     corpo='<div class="ficha">'+kv.map(([k,v])=>'<div><span>'+k+'</span>'+H(v)+'</div>').join('')+'</div><table class="t"><thead><tr><th style="width:36%">Certidão</th><th style="width:13%">Emissão</th><th style="width:13%">Validade</th><th style="width:18%">Situação</th><th>'+(o.obs?'Status / observação':'Status')+'</th></tr></thead><tbody>'+d.linhas.map(x=>'<tr><td><b>'+H(x.t.n)+'</b></td><td class="m">'+br(x.i.c.emissao)+'</td><td class="m">'+br(x.i.val)+'</td><td>'+pl(x.i.est)+'</td><td class="o">'+obsTxt(x.i)+'</td></tr>').join('')+'</tbody></table>';}
   else{land=true;titulo='Quadro geral de certidões';sub='Validade de cada certidão por empresa ativa';
-    corpo='<table class="t q"><thead><tr><th class="qe">Empresa</th>'+d.T.map(t=>'<th>'+H(t.a)+'</th>').join('')+'</tr></thead><tbody>'+d.act.map(e=>'<tr><td class="qe"><b>'+H(e.nome)+'</b></td>'+d.T.map(t=>{const i=infoLote(e,t.k);return '<td><span class="qc" style="color:'+cor[i.est]+';background:'+bg[i.est]+'">'+(i.val?br(i.val).slice(0,6)+br(i.val).slice(8):(i.est==='and'?'pedida':i.est==='pend'?'pend.':'—'))+'</span></td>';}).join('')+'</tr>').join('')+'</tbody></table><p class="leg">'+['ok','atencao','renovar','venc','pend','and','sem'].map(k=>pl(k)).join(' ')+'</p>';}
+    corpo='<table class="t q"><thead><tr><th class="qe">Empresa</th>'+d.T.map(t=>'<th>'+H(t.a)+'</th>').join('')+'</tr></thead><tbody>'+d.act.map(e=>'<tr><td class="qe"><b>'+H(e.nome)+'</b></td>'+d.T.map(t=>{const i=infoLote(e,t.k);return '<td><span class="qc" style="color:'+cor[i.est]+';background:'+bg[i.est]+'">'+(i.est==='na'?'N/A':i.val?br(i.val).slice(0,6)+br(i.val).slice(8):(i.est==='and'?'pedida':i.est==='pend'?'pend.':'—'))+'</span></td>';}).join('')+'</tr>').join('')+'</tbody></table><p class="leg">'+['ok','atencao','renovar','venc','pend','and','sem','na'].map(k=>pl(k)).join(' ')+'</p>';}
   const html='<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><base href="'+base+'"><title>'+H(titulo)+' — Jopec Legalização '+hojeISO()+'</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap"><style>'+
   '@page{size:A4 '+(land?'landscape':'portrait')+';margin:12mm 11mm 16mm;@bottom-left{content:"Jopec · Setor de Legalização · Responsável: Mateus Lima Miguel";font:8pt "Plus Jakarta Sans",sans-serif;color:#6b6162}@bottom-right{content:"Página " counter(page) " de " counter(pages);font:8pt "Plus Jakarta Sans",sans-serif;color:#6b6162}}'+
   '*{box-sizing:border-box;-webkit-print-color-adjust:exact;print-color-adjust:exact}body{margin:0;font:9.5pt/1.4 "Plus Jakarta Sans",system-ui,sans-serif;color:#231a1b;background:#fff}'+
