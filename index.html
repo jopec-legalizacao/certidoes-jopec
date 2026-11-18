@@ -409,14 +409,14 @@ const TIPOS=[
  {k:'PGM',n:'Dívida Ativa do Município (PGM)',a:'PGM',prazo:119,ant:14,m:['Dívida Ativa do Munic']},
  {k:'FGTS',n:'FGTS (CRF)',a:'FGTS',prazo:29,ant:5,m:['FGTS']},
  {k:'TRAB',n:'Débitos Trabalhistas (CNDT)',a:'CNDT',prazo:180,ant:15,m:['Débitos Trab']},
- {k:'CORREG',n:'Corregedoria',a:'CORR',prazo:90,ant:10,m:['Corregedoria']},
+ {k:'CORREG',n:'Corregedoria',a:'CORR',prazo:90,ant:10,m:['Corregedoria'],oculto:true},
  {k:'CIV',n:'TJ – Ações Cíveis',a:'CÍVEL',prazo:90,ant:10,m:['Ações Cíveis','Ações Civeis','Cível']},
  {k:'FAL',n:'TJ – Ações de Falências e Concordatas',a:'FAL',prazo:90,ant:10,m:['Falências','Falencias']},
  {k:'PROT',n:'Protesto de Títulos',a:'PROT',prazo:90,ant:10,m:['Protesto']},
  {k:'SICAF',n:'SICAF',a:'SICAF',prazo:365,ant:30,m:['SICAF']}
 ];
 const TK=Object.fromEntries(TIPOS.map(t=>[t.k,t]));
-const TV=TIPOS.filter(t=>!t.legado);
+const TV=TIPOS.filter(t=>!t.legado&&!t.oculto);
 const LINKS0={RFB:'https://solucoes.receita.fazenda.gov.br/Servicos/certidaointernet/PJ/Emitir',EST:'https://www.fazenda.rj.gov.br/portal-fazenda',SEFAZ:'https://www.fazenda.rj.gov.br/portal-fazenda',PGE:'https://www.pge.rj.gov.br/divida-ativa',ISS:'https://www2.rio.rj.gov.br/smf/forms/pesquisa.asp',PGM:'https://daminternet.rio.rj.gov.br/',FGTS:'https://consulta-crf.caixa.gov.br/consultacrf/pages/consultaEmpregador.jsf',TRAB:'https://cndt-certidao.tst.jus.br/inicio.faces'};
 let LINKS=Object.assign({},LINKS0),cfgVer=null;
 function chaveDe(e,k){return k==='ISS'?(e.im||'').replace(/\D/g,''):(e.cnpj||'').replace(/\D/g,'');}
@@ -488,7 +488,7 @@ function renderPainel(){
   requestAnimationFrame(desenhar);
   const L=linhas();const cnt={venc:0,renovar:0,atencao:0,pend:0,and:0};L.forEach(x=>cnt[x.i.est]++);
   $('#kpis').innerHTML=[['renovar','Renovar agora'],['venc','Vencidas'],['atencao','Vencem em 30 dias'],['pend','Pendências'],['and','Em andamento']].map(([k,l])=>'<button class="kpi" data-k="'+k+'" aria-pressed="'+(st.kpi===k)+'"><b class="mono">'+cnt[k]+'</b><span>'+l+'</span></button>').join('');
-  $('#filaTipos').innerHTML='<button class="chip" data-t="" aria-pressed="'+(!st.tipo)+'">Todas</button>'+TIPOS.filter(t=>!t.legado).map(t=>'<button class="chip" data-t="'+t.k+'" title="'+esc(t.n)+'" aria-pressed="'+(st.tipo===t.k)+'">'+t.a+'</button>').join('');
+  $('#filaTipos').innerHTML='<button class="chip" data-t="" aria-pressed="'+(!st.tipo)+'">Todas</button>'+TV.map(t=>'<button class="chip" data-t="'+t.k+'" title="'+esc(t.n)+'" aria-pressed="'+(st.tipo===t.k)+'">'+t.a+'</button>').join('');
   const ord={renovar:0,venc:1,pend:2,and:3,atencao:4};
   let F=L.filter(x=>(!st.kpi||x.i.est===st.kpi)&&(!st.tipo||x.t.k===st.tipo)&&(!st.fbusca||x.e.nome.toLowerCase().includes(st.fbusca)));
   F.sort((a,b)=>ord[a.i.est]-ord[b.i.est]||((a.i.val||'9')<(b.i.val||'9')?-1:1));
@@ -509,7 +509,7 @@ const ORDEM=[['ok','ok','Válida'],['atencao','warn','Vence em breve'],['renovar
 let BARS=[];
 function desenhar(){
   if(!dbOk)return;const act=EMP.filter(e=>e.ativo!==false);
-  const por=TIPOS.filter(t=>!t.legado).map(t=>{const c={ok:0,atencao:0,renovar:0,venc:0,pend:0,and:0,sem:0};act.forEach(e=>{const i=info(e,t.k);if(c[i.est]!==undefined)c[i.est]++;});return {t,c};});
+  const por=TV.map(t=>{const c={ok:0,atencao:0,renovar:0,venc:0,pend:0,and:0,sem:0};act.forEach(e=>{const i=info(e,t.k);if(c[i.est]!==undefined)c[i.est]++;});return {t,c};});
   let em=0,tot=0;por.forEach(p=>{em+=p.c.ok+p.c.atencao+p.c.and;tot+=p.c.ok+p.c.atencao+p.c.and+p.c.renovar+p.c.venc+p.c.pend;});
   const pct=tot?Math.round(em*100/tot):0;$('#ringPct').textContent=tot?pct+'%':'–';
   {const {x}=cv('ring',170);const cx=85,cy=85,r=70;x.lineWidth=16;x.lineCap='round';x.strokeStyle=tok('surface2');x.beginPath();x.arc(cx,cy,r,0,Math.PI*2);x.stroke();
@@ -784,7 +784,6 @@ const _TIPOS_DOC=[
  ['FAL',/FALENCIA|CONCORDATA|RECUPERACAO JUDICIAL/],
  ['CIV',/ACOES CIVEIS|DISTRIBUICAO CIVEL|\bCIVEL\b|\bCIVEIS\b/],
  ['PROT',/PROTESTO/],
- ['CORREG',/CORREGEDORIA/],
  ['SICAF',/\bSICAF\b/]
 ];
 function lerCertidao(items){
@@ -941,13 +940,13 @@ function aplicarPapel(email){userEmail=(email||'').toLowerCase();isAdmin=ADMINS.
 const infoLote=info;
 let LT=null;try{LT=localStorage.getItem('loteTipo');}catch(e){}
 const LE0=['venc','renovar','pend'];let LE=new Set(LE0);const FEITO=new Set();let lAtual=null;
-const LOTE_TIPOS=()=>TIPOS.filter(t=>!t.legado);
+const LOTE_TIPOS=()=>TV;
 function lLinhas(k){const q=($('#lBusca').value||'').toLowerCase();
   return EMP.filter(e=>e.ativo!==false).map(e=>({e,i:infoLote(e,k)})).filter(x=>LE.has(x.i.est)&&(!q||x.e.nome.toLowerCase().includes(q)))
    .sort(ordAcao);}
 function ordAcao(a,b){return PRI[a.i.est]-PRI[b.i.est]||(a.i.est==='venc'?((a.i.val||'0')>(b.i.val||'0')?-1:(a.i.val||'0')<(b.i.val||'0')?1:0):((a.i.val||'9')<(b.i.val||'9')?-1:(a.i.val||'9')>(b.i.val||'9')?1:0))||a.e.nome.localeCompare(b.e.nome,'pt');}
 function renderLote(){
-  const T=LOTE_TIPOS();if(!LT||!TK[LT]||TK[LT].legado)LT=T[0].k;
+  const T=LOTE_TIPOS();if(!LT||!TK[LT]||TK[LT].legado||TK[LT].oculto)LT=T[0].k;
   const act=EMP.filter(e=>e.ativo!==false);
   const cont=T.map(t=>{let n=0,a=0;act.forEach(e=>{const s=infoLote(e,t.k).est;if(s==='venc'||s==='renovar'||s==='pend')n++;if(s==='and')a++;});return {t,n,a};});
   cont.sort((x,y)=>y.n-x.n);
